@@ -2,7 +2,9 @@ import Messaging from "./messaging/index.js"
 import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
-import { Domain } from '../../../../manifest/src/index.js'
+import { Domain } from '@servable/tools'
+// import { Domain } from '../../../../tools/src/index.js'
+
 const { Servable: BaseClass } = Domain
 
 export default class Servable extends BaseClass {
