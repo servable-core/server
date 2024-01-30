@@ -1,0 +1,43 @@
+[
+    {
+        "name": "none",
+        "description": "Default ",
+        "type": "none",
+        "isEnabled": true
+    },
+    {
+        "name": "locale",
+        "description": "Locale",
+        "type": "locale",
+        "isEnabled": true
+    },
+    {
+        "name": "currency",
+        "description": "Currency",
+        "type": "currency",
+        "isEnabled": true
+    },
+    {
+        "name": "country",
+        "description": "Language",
+        "type": "country",
+        "isEnabled": true
+    },
+    {
+        "name": "platform",
+        "description": "Platform",
+        "type": "platform",
+        "isEnabled": true,
+        "options": [
+            {
+                "id": "iOS"
+            },
+            {
+                "id": "Android"
+            },
+            {
+                "id": "Web"
+            }
+        ]
+    }
+]

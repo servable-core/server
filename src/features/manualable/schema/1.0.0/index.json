@@ -1,0 +1,24 @@
+{
+    "managed": {
+        "classes": []
+    },
+    "target": {
+        "classLevelPermissions": {
+            "protectedFields": {
+                "*": []
+            }
+        },
+        "fields": {
+            "manualableMode": {
+                "type": "String"
+            },
+            "manualableSourceData": {
+                "type": "Object"
+            },
+            "manualableSourceSHA": {
+                "type": "String"
+            }
+        },
+        "indexes": {}
+    }
+}
