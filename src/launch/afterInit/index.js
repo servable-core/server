@@ -1,6 +1,6 @@
 import handleFeature from "./handleFeature/index.js"
 
-export default async ({ app, schema, configuration, server, servableConfig, frameworkBridge }) => {
+export default async ({ app, schema, configuration, server, servableConfig, engine }) => {
 
   const {
     features
@@ -13,7 +13,7 @@ export default async ({ app, schema, configuration, server, servableConfig, fram
       configuration,
       server,
       servableConfig,
-      frameworkBridge,
+      engine,
       feature,
       allFeatures: features
     })

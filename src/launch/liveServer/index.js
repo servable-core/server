@@ -1,4 +1,4 @@
 
-export default async ({ httpServer, frameworkBridge }) => {
-  return frameworkBridge.launchLiveServer({ httpServer })
+export default async ({ httpServer, engine }) => {
+  return engine.launchLiveServer({ httpServer })
 }

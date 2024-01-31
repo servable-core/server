@@ -6,7 +6,7 @@ export default async (props) => {
     configuration,
     server,
     servableConfig,
-    frameworkBridge,
+    engine,
     allFeatures
   } = props
 
@@ -21,7 +21,7 @@ export default async (props) => {
     configuration,
     server,
     servableConfig,
-    frameworkBridge,
+    engine,
     allFeatures,
     feature
   })

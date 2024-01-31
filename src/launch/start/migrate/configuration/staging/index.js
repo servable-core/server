@@ -11,7 +11,7 @@ export default async (props) => {
     app,
     schema,
     migrationPayload,
-    frameworkBridge
+    engine
   } = props
 
   let result
@@ -21,7 +21,7 @@ export default async (props) => {
   await setupDecoydatabase({ configuration, })
 
   if (!migrationPayload || !migrationPayload.length) {
-    result = await frameworkBridge.launchWithMigration({
+    result = await engine.launchWithMigration({
       schema,
       configuration,
       app
@@ -30,7 +30,7 @@ export default async (props) => {
   else {
     const bootConfig = { ...configuration.config }
     delete bootConfig.parse.schema
-    await frameworkBridge.doLaunch({
+    await engine.doLaunch({
       config: bootConfig,
       app
     })

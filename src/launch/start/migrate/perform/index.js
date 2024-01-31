@@ -8,7 +8,7 @@ export default async (props) => {
     migrationPayload,
     configuration,
     app,
-    frameworkBridge } = props
+    engine } = props
 
   let schema = props.schema
   let i = 0
@@ -46,7 +46,7 @@ export default async (props) => {
         continue
       }
 
-      result = await frameworkBridge.launchWithMigration({ schema, configuration, app })
+      result = await engine.launchWithMigration({ schema, configuration, app })
       await didMigrateStepSuccessfully({
         configuration,
         schema

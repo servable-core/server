@@ -9,7 +9,7 @@ export default async ({
   servableConfig,
   app,
   schema,
-  frameworkBridge }) => {
+  engine }) => {
 
 
   const {
@@ -22,7 +22,7 @@ export default async ({
     waitBeforeQuit: stagingWaitBeforeQuit,
     migrations: stagingMigrations
   } = await qualifyStaging({
-    servableConfig, app, schema, frameworkBridge,
+    servableConfig, app, schema, engine,
   })
 
   console.log('[SERVABLE]', '[DEBUG]', 'boot>staging params', stagingStateItem)
@@ -36,7 +36,7 @@ export default async ({
     waitBeforeQuit: productionWaitBeforeQuit,
     migrations: productionMigrations
   } = await qualifyProduction({
-    servableConfig, app, schema, frameworkBridge, schema, stagingStateItem
+    servableConfig, app, schema, engine, schema, stagingStateItem
   })
 
   console.log('[SERVABLE]', '[DEBUG]', 'boot>production params', productionStateItem)
@@ -64,7 +64,7 @@ export default async ({
       migrationPayload: stagingMigrations,
       servableConfig,
       configuration: stagingConfiguration,
-      frameworkBridge
+      engine
     })
 
     if (result.error) {
@@ -82,7 +82,7 @@ export default async ({
 
   if (stagingShouldRun) {
     console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should run')
-    result = await frameworkBridge.launchWithNoMigration({
+    result = await engine.launchWithNoMigration({
       app,
       schema,
       configuration: stagingConfiguration
@@ -126,7 +126,7 @@ export default async ({
       migrationPayload: productionMigrations,
       servableConfig,
       configuration: productionConfiguration,
-      frameworkBridge
+      engine
     })
 
     if (result.error) {
@@ -149,7 +149,7 @@ export default async ({
   }
 
   console.log('[SERVABLE]', '[DEBUG]', 'boot>launch with no migration')
-  result = await frameworkBridge.launchWithNoMigration({
+  result = await engine.launchWithNoMigration({
     app,
     schema,
     configuration: productionConfiguration

@@ -14,7 +14,7 @@ export default class Servable extends BaseClass {
   _servableConfig = null
   _messaging = null
   _config = {}
-  _frameworkBridge = null
+  _engine = null
 
   get Services() { return this._services }
   set Services(value) { this._services = value }
@@ -34,23 +34,23 @@ export default class Servable extends BaseClass {
   get Config() { return this._config }
   set Config(value) { this._config = value }
 
-  get frameworkBridge() { return this._frameworkBridge }
-  set frameworkBridge(value) { this._frameworkBridge = value }
+  get engine() { return this._engine }
+  set engine(value) { this._engine = value }
 
   constructor(props) {
     super(props)
     this.App = {}
   }
 
-  async hydrate({ servableConfig, frameworkBridge, app }) {
-    await super.hydrate({ servableConfig, frameworkBridge, app })
+  async hydrate({ servableConfig, engine, app }) {
+    await super.hydrate({ servableConfig, engine, app })
     this._servableConfig = servableConfig
     this._messaging = new Messaging()
     this._services = new Services()
     this._agenda = new Agenda()
     this._express = new Express()
-    this.frameworkBridge = frameworkBridge
-    this.App = await this._frameworkBridge.adaptApp({ servableConfig })
+    this.engine = engine
+    this.App = await this._engine.adaptApp({ servableConfig })
 
     if (this.App.Route) {
       this.App.Route.Constants = {
@@ -70,7 +70,7 @@ export default class Servable extends BaseClass {
         }
       }
     }
-    // this.AppNative = await this._frameworkBridge.adaptAppNative({ servableConfig: this.servableConfig })
+    // this.AppNative = await this._engine.adaptAppNative({ servableConfig: this.servableConfig })
     this.AppNative = app
   }
 

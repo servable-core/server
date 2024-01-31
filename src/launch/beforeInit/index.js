@@ -6,7 +6,7 @@ export default async ({
   configuration,
   server,
   servableConfig,
-  frameworkBridge }) => {
+  engine }) => {
 
   const {
     features
@@ -19,7 +19,7 @@ export default async ({
       configuration,
       server,
       servableConfig,
-      frameworkBridge,
+      engine,
       feature,
       allFeatures: features
     })

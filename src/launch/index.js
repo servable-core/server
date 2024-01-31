@@ -10,8 +10,8 @@ import adaptConfig from "../lib/adaptConfig/index.js"
 import printEnd from './_messages/end.js'
 import launchSystem from "./system/index.js"
 import config from "./config/index.js"
-import { buildSchema, validateSchema } from '@servable/tools'
-// import { buildSchema, validateSchema } from '../../../manifest/src/index.js'
+// import { buildSchema, validateSchema } from '@servable/tools'
+import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
 
@@ -21,16 +21,16 @@ export default async props => {
 
   try {
 
-    const { servableConfig, adapter: frameworkBridge } = props
-    adaptConfig({ servableConfig, frameworkBridge })
+    const { servableConfig, adapter: engine } = props
+    adaptConfig({ servableConfig, engine })
 
     global.Servable = new ServableClass()
 
 
     // console.log("[Servable]", '[DEBUG]', `Launch > Start`,)
 
-    const app = await frameworkBridge.createApp({ servableConfig })
-    await global.Servable.hydrate({ servableConfig, frameworkBridge, app })
+    const app = await engine.createApp({ servableConfig })
+    await global.Servable.hydrate({ servableConfig, engine, app })
     // Servable.Express.app = app
     // console.log("[Servable]", '[DEBUG]', `Launch > created an expres app`, Servable.Express.app)
 
@@ -46,20 +46,20 @@ export default async props => {
     await launchSystem({
       schema: staticSchema,
       servableConfig,
-      frameworkBridge
+      engine
     })
 
     // console.log("[Servable]", '[DEBUG]', `servableConfig`, servableConfig)
 
 
-    const httpServer = await frameworkBridge.createHttpServer({ app })
+    const httpServer = await engine.createHttpServer({ app })
     Servable.httpServer = httpServer
     // console.log("[Servable]", '[DEBUG]', `Launch > created a http server`)
 
 
 
     // console.log("[Servable]", '[DEBUG]', `Launch > starting the parse server`)
-    const serverStruct = await start({ app, servableConfig, schema: staticSchema, frameworkBridge })
+    const serverStruct = await start({ app, servableConfig, schema: staticSchema, engine })
     if (!serverStruct) {
       console.log("[Servable]", '[DEBUG]', `Launch > failed creating the parse server`)
       return
@@ -90,7 +90,7 @@ export default async props => {
       configuration,
       server,
       servableConfig,
-      frameworkBridge
+      engine
     })
     await registerClasses({
       schema
@@ -101,7 +101,7 @@ export default async props => {
     })
     await liveServer({
       httpServer,
-      frameworkBridge
+      engine
     })
     await seed({
       server,
@@ -109,7 +109,7 @@ export default async props => {
       app,
       httpServer,
       configuration,
-      frameworkBridge,
+      engine,
       operationProps: {
         server,
         schema,
@@ -128,7 +128,7 @@ export default async props => {
       configuration,
       server,
       servableConfig,
-      frameworkBridge
+      engine
     })
     /////////////////////////////
 
