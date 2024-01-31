@@ -3,8 +3,7 @@ import Agenda from 'agenda'
 export default class ServableAgenda {
   _instance = null
 
-  constructor(props) {
-    const { } = props
+  constructor() {
     this._instance = new Agenda({
       db: {
         address: process.env.SERVABLE_UTILS_DATABASE_URI
@@ -37,9 +36,7 @@ export default class ServableAgenda {
     return jobs
   }
 
-  async schedule(props) {
-    const { item, job, name } = props
-
+  async schedule({ item, job, name }) {
     if (!item) {
       return
     }

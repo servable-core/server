@@ -2,8 +2,8 @@
 // import watchServer from './watch/index.js'
 
 
-export default async (props) => {
-  const { launchedServer, servableConfig } = props
+export default async ({ launchedServer, servableConfig }) => {
+
   const { configuration } = launchedServer
   const { distribution } = servableConfig
   if (!distribution || !distribution.enabled) {

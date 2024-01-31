@@ -1,4 +1,3 @@
-import Messaging from "./messaging/index.js"
 import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
@@ -12,15 +11,11 @@ export default class Servable extends BaseClass {
   _schema = null
   _httpServer = null
   _servableConfig = null
-  _messaging = null
   _config = {}
   _engine = null
 
   get Services() { return this._services }
   set Services(value) { this._services = value }
-
-  get Messaging() { return this._messaging }
-  set Messaging(value) { this._messaging = value }
 
   get Express() { return this._express }
   set Express(value) { this._express = value }
@@ -45,7 +40,6 @@ export default class Servable extends BaseClass {
   async hydrate({ servableConfig, engine, app }) {
     await super.hydrate({ servableConfig, engine, app })
     this._servableConfig = servableConfig
-    this._messaging = new Messaging()
     this._services = new Services()
     this._agenda = new Agenda()
     this._express = new Express()

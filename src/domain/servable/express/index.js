@@ -4,7 +4,7 @@ export default class ServableExpress {
   _app = null
   _cache = cacheFn
 
-  constructor(props) {
+  constructor() {
 
   }
 
