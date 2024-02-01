@@ -2,12 +2,12 @@ export default async ({ feature, version, direction }) => {
 
   const up = await feature.loader.schemaVersionOf({
     version,
-    subPath: 'migration/up/index.js'
+    subPath: 'up'
   })
 
   const down = await feature.loader.schemaVersionOf({
     version,
-    subPath: 'migration/down/index.js'
+    subPath: 'down'
   })
 
   if (direction === 'up' && !up) {

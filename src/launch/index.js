@@ -10,8 +10,8 @@ import adaptConfig from "../lib/adaptConfig/index.js"
 import printEnd from './_messages/end.js'
 import launchSystem from "./system/index.js"
 import config from "./config/index.js"
-import { buildSchema, validateSchema } from '@servable/tools'
-// import { buildSchema, validateSchema } from '../../../tools/src/index.js'
+// import { buildSchema, validateSchema } from '@servable/tools'
+import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
 
@@ -139,14 +139,14 @@ export default async props => {
     printEnd()
 
     Servable.App.Route.define({
-      method: Servable.App.Route.Constants.Methods.GET,
+      method: "get",
       paths: ['/health-check', '/healthcheck'],
       handler: async () => "Health check passed"
     })
   } catch (e) {
     console.error('[SERVABLE]', 'launch', e)
     Servable.App.Route.define({
-      method: Servable.App.Route.Constants.Methods.GET,
+      method: "get",
       path: '/health-check',
       handler: async (_, response) => {
         response.status(500).send('Server failed')
