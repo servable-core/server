@@ -1,9 +1,6 @@
 import migrate from '../migrate/index.js'
 import quit from './quit.js'
-import qualifyStaging from './payload/staging/index.js'
 import qualifyProduction from './payload/production/index.js'
-import didConsumeValidation from '../launchers/auxiliary/didConsumeValidation/index.js'
-import tearDownDecoydatabase from "../migrate/configuration/utils/decoyDatabase/tearDown/index.js"
 
 export default async ({
   servableConfig,
@@ -12,20 +9,20 @@ export default async ({
   engine }) => {
 
 
-  const {
-    stateItem: stagingStateItem,
-    configuration: stagingConfiguration,
-    shouldQuit: stagingShouldQuit,
-    shouldRun: stagingShouldRun,
-    shouldQuitError: stagingShouldQuitError,
-    shouldMigrate: stagingShouldMigrate,
-    waitBeforeQuit: stagingWaitBeforeQuit,
-    migrations: stagingMigrations
-  } = await qualifyStaging({
-    servableConfig, app, schema, engine,
-  })
+  // const {
+  //   stateItem: stagingStateItem,
+  //   configuration: stagingConfiguration,
+  //   shouldQuit: stagingShouldQuit,
+  //   shouldRun: stagingShouldRun,
+  //   shouldQuitError: stagingShouldQuitError,
+  //   shouldMigrate: stagingShouldMigrate,
+  //   waitBeforeQuit: stagingWaitBeforeQuit,
+  //   migrations: stagingMigrations
+  // } = await qualifyStaging({
+  //   servableConfig, app, schema, engine,
+  // })
 
-  console.log('[SERVABLE]', '[DEBUG]', 'boot>staging params', stagingStateItem)
+  // console.log('[SERVABLE]', '[DEBUG]', 'boot>staging params', stagingStateItem)
 
   const {
     stateItem: productionStateItem,
@@ -36,7 +33,8 @@ export default async ({
     waitBeforeQuit: productionWaitBeforeQuit,
     migrations: productionMigrations
   } = await qualifyProduction({
-    servableConfig, app, schema, engine, schema, stagingStateItem
+    // servableConfig, app, schema, engine, schema, stagingStateItem
+    servableConfig, app, schema, engine, schema,
   })
 
   console.log('[SERVABLE]', '[DEBUG]', 'boot>production params', productionStateItem)
@@ -46,53 +44,53 @@ export default async ({
 
   /* #region STAGING */
 
-  if (stagingShouldQuit) {
-    console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should quit')
-    quit({
-      delay: stagingWaitBeforeQuit,
-      error: stagingShouldQuitError
-    })
-    return null
-  }
+  // if (stagingShouldQuit) {
+  //   console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should quit')
+  //   quit({
+  //     delay: stagingWaitBeforeQuit,
+  //     error: stagingShouldQuitError
+  //   })
+  //   return null
+  // }
 
-  if (stagingShouldMigrate) {
-    console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should migrate')
-    result = await migrate({
-      app,
-      hasBeenInitialized,
-      schema,
-      migrationPayload: stagingMigrations,
-      servableConfig,
-      configuration: stagingConfiguration,
-      engine
-    })
+  // if (stagingShouldMigrate) {
+  //   console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should migrate')
+  //   result = await migrate({
+  //     app,
+  //     hasBeenInitialized,
+  //     schema,
+  //     migrationPayload: stagingMigrations,
+  //     servableConfig,
+  //     configuration: stagingConfiguration,
+  //     engine
+  //   })
 
-    if (result.error) {
-      console.log('[SERVABLE]', '[DEBUG]', 'boot>staging result error', result.error)
-      quit(result)
-      return null
-    }
+  //   if (result.error) {
+  //     console.log('[SERVABLE]', '[DEBUG]', 'boot>staging result error', result.error)
+  //     quit(result)
+  //     return null
+  //   }
 
-    return {
-      ...(result ? result : {}),
-      schema,
-      configuration: stagingConfiguration,
-    }
-  }
+  //   return {
+  //     ...(result ? result : {}),
+  //     schema,
+  //     configuration: stagingConfiguration,
+  //   }
+  // }
 
-  if (stagingShouldRun) {
-    console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should run')
-    result = await engine.launchWithNoMigration({
-      app,
-      schema,
-      configuration: stagingConfiguration
-    })
-    return {
-      ...(result ? result : {}),
-      schema,
-      configuration: stagingConfiguration,
-    }
-  }
+  // if (stagingShouldRun) {
+  //   console.log('[SERVABLE]', '[DEBUG]', 'boot>staging should run')
+  //   result = await engine.launchWithNoMigration({
+  //     app,
+  //     schema,
+  //     configuration: stagingConfiguration
+  //   })
+  //   return {
+  //     ...(result ? result : {}),
+  //     schema,
+  //     configuration: stagingConfiguration,
+  //   }
+  // }
 
   /* #endregion */
 
@@ -135,11 +133,11 @@ export default async ({
       return null
     }
 
-    if (stagingStateItem) {
-      console.log('[SERVABLE]', '[DEBUG]', 'boot>production & staging decoy setup')
-      await tearDownDecoydatabase({ configuration: stagingConfiguration })
-      await didConsumeValidation({ configuration: stagingConfiguration })
-    }
+    // if (stagingStateItem) {
+    //   console.log('[SERVABLE]', '[DEBUG]', 'boot>production & staging decoy setup')
+    //   await tearDownDecoydatabase({ configuration: stagingConfiguration })
+    //   await didConsumeValidation({ configuration: stagingConfiguration })
+    // }
 
     return {
       ...result,
