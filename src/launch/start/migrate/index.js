@@ -57,6 +57,7 @@ export default async (props) => {
     return result
 
   } catch (error) {
+    console.error("[SERVABLE]", "didnotmigrate", error)
     await didNotMigrateError({
       configuration,
       schema,

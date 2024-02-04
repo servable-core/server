@@ -21,7 +21,7 @@ export default async props => {
 
   try {
 
-    const { servableConfig, adapter: engine } = props
+    const { servableConfig, engine } = props
     adaptConfig({ servableConfig, engine })
 
     global.Servable = new ServableClass()
@@ -59,7 +59,12 @@ export default async props => {
 
 
     // console.log("[Servable]", '[DEBUG]', `Launch > starting the parse server`)
-    const serverStruct = await start({ app, servableConfig, schema: staticSchema, engine })
+    const serverStruct = await start({
+      app,
+      servableConfig,
+      schema: staticSchema,
+      engine
+    })
     if (!serverStruct) {
       console.log("[Servable]", '[DEBUG]', `Launch > failed creating the parse server`)
       return

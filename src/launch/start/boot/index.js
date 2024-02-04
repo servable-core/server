@@ -23,7 +23,7 @@ export default async ({
   // })
 
   // console.log('[SERVABLE]', '[DEBUG]', 'boot>staging params', stagingStateItem)
-
+  console.error("[SERVABLE]", "start > boot > engine", engine, "engine.doLaunch", engine.doLaunch)
   const {
     stateItem: productionStateItem,
     configuration: productionConfiguration,
