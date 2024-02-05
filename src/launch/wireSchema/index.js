@@ -8,7 +8,8 @@ export default async ({ schema, servableConfig }) => {
   await Promise.all(features.map(async feature => {
     await registerFeature({
       feature,
-      servableConfig
+      servableConfig,
+      allFeatures: features
     })
   }))
   console.log("[Servable]", `Launch > Wire schema > Success`)

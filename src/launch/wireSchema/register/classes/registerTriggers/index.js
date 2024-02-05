@@ -3,6 +3,7 @@ import * as FeatureTriggers from './featureTriggers/index.js'
 export default async ({
   _class,
   feature,
+  allFeatures
 }) => {
   try {
     const { className } = _class
@@ -18,7 +19,7 @@ export default async ({
 
     Servable.App.Cloud.beforeSave(className, async (request) => {
       try {
-        await FeatureTriggers.beforeSave({ request, feature, })
+        await FeatureTriggers.beforeSave({ request, feature, allFeatures })
         classTriggers && classTriggers.beforeSave && await classTriggers.beforeSave({ request, feature })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeSave`, e.message)
@@ -27,7 +28,7 @@ export default async ({
 
     Servable.App.Cloud.afterSave(className, async (request) => {
       try {
-        await FeatureTriggers.afterSave({ request, feature, })
+        await FeatureTriggers.afterSave({ request, feature, allFeatures })
         classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, feature })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterSave`, e.message)
@@ -36,7 +37,7 @@ export default async ({
 
     Servable.App.Cloud.beforeDelete(className, async (request) => {
       try {
-        await FeatureTriggers.beforeDelete({ request, feature, })
+        await FeatureTriggers.beforeDelete({ request, feature, allFeatures })
         classTriggers && classTriggers.beforeDelete && await classTriggers.beforeDelete({ request, feature })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeDelete`, e.message)
@@ -45,7 +46,7 @@ export default async ({
 
     Servable.App.Cloud.afterDelete(className, async (request) => {
       try {
-        await FeatureTriggers.afterDelete({ request, feature, })
+        await FeatureTriggers.afterDelete({ request, feature, allFeatures })
         classTriggers && classTriggers.afterDelete && await classTriggers.afterDelete({ request, feature })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterDelete`, e.message)

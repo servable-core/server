@@ -1,4 +1,4 @@
-import featuresSubclass from "./featuresSubclass/index.js"
+import featuresSubclass from "./featuresSubclass.js"
 import adaptFeaturePayload from "../../utils/adaptFeaturePayload.js"
 
 export default async ({

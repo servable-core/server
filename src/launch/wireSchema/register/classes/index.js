@@ -5,14 +5,15 @@ import registerJobs from '../jobs/index.js'
 export default async ({
   managedClasses,
   feature,
+  allFeatures,
   servableConfig,
 }) => {
 
   return Promise.all(managedClasses.map(async _class => {
     await registerTriggers({
       feature,
-
       servableConfig,
+      allFeatures,
       _class
     })
 

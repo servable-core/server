@@ -1,6 +1,9 @@
 import execute from './execute/index.js'
 
-export const beforeSave = async ({ request, allFeatures, feature }) => {
+export const beforeSave = async ({
+  request,
+  allFeatures,
+  feature }) => {
   const { object } = request
   let dirtyKeys = object.dirtyKeys()
   dirtyKeys = dirtyKeys ? dirtyKeys : []

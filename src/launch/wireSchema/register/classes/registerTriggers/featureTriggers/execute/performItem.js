@@ -23,7 +23,11 @@ const perform = async ({
   if (!triggers) {
     return
   }
-  const operation = triggers[operationName]
+  let operation = triggers[operationName]
+  if (!operation) {
+    operation = triggers[operationName.toLowerCase()]
+  }
+
   if (!operation) {
     return
   }

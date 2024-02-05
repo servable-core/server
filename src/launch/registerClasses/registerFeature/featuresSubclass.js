@@ -1,5 +1,5 @@
 import _ from 'underscore'
-import cleanFeatures from '../../../../lib/utils/cleanFeatures.js'
+import cleanFeatures from '../../../lib/utils/cleanFeatures.js'
 
 export default async ({
   allFeatures,

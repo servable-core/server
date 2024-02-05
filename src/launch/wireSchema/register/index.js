@@ -6,7 +6,8 @@ import registerServices from "./services/index.js"
 
 export default async ({
   feature,
-  servableConfig
+  servableConfig,
+  allFeatures
 }) => {
 
   const prefix = feature.id === 'app' ? null : feature.id
@@ -28,6 +29,7 @@ export default async ({
   await registerClasses({
     servableConfig,
     feature,
+    allFeatures,
     managedClasses,
   })
 }
