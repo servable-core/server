@@ -18,7 +18,8 @@ export default class Intercom {
     }
     const _service = {
       ...service,
-      version: service.version ? service.version : DEFAULT_SERVICE_VERSION
+      version: service.version ? service.version : DEFAULT_SERVICE_VERSION,
+      feature //#TODO: don't retain feature
     }
     this.items.push(_service)
     await _service.register({ feature })
@@ -30,11 +31,12 @@ export default class Intercom {
     version = DEFAULT_SERVICE_VERSION,
     params,
   }) {
-    const candidate = _.findWhere(this.items, { id, version })
-    if (!candidate) {
+    const service = _.findWhere(this.items, { id, version })
+    if (!service) {
       return new Error("Could not find designated service.")
     }
 
-    return candidate.handler({ params })
+    //#TODO: don't retain feature
+    return service.handler({ params, feature: service.feature })
   }
 }
