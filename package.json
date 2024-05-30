@@ -71,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@servable/tools": "^1.1.0",
+    "@servable/tools": "^1.1.2",
     "agenda": "*",
     "docker-compose": "0.24.1",
     "get-port": "^6.1.2",
