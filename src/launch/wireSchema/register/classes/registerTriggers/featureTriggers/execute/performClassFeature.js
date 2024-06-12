@@ -1,16 +1,16 @@
 import _ from 'underscore'
 
 const perform = async ({
-  item,
+  classFeature,
   allFeatures,
-  items,
+  classFeatures,
   cache,
   operationName,
   feature,
   featureInstance,
   request }) => {
 
-  const featureId = _.isObject(item) ? item.id : item
+  const featureId = _.isObject(classFeature) ? classFeature.id : classFeature
   if (cache[featureId] === 1 || cache[featureId] === 2 || cache[featureId] === 3) {
     return
   }
@@ -38,6 +38,7 @@ const perform = async ({
     return doPerform({
       request,
       feature,
+      classFeature,
       featureInstance,
       operation,
       featureId,
@@ -56,26 +57,27 @@ const perform = async ({
       continue
     }
 
-    const candidates = items.filter(a => (a.id === id || a === id))
+    const candidates = classFeatures.filter(a => (a.id === id || a === id))
     if (!candidates || !candidates.length) {
       continue
     }
     const candidate = candidates[0]
     await perform({
       allFeatures,
-      items,
+      classFeatures,
       cache,
       operationName,
       feature,
       featureInstance,
       request,
-      item: candidate
+      classFeature: candidate
     })
   }
 
   return doPerform({
     request,
     feature,
+    classFeature,
     featureInstance,
     operation,
     featureId,
@@ -88,13 +90,14 @@ const doPerform = async ({
   request,
   feature,
   featureInstance,
+  classFeature,
   cache,
   operation,
   featureId,
   operationName }) => {
   try {
     cache[featureId] = 1
-    await operation({ request, feature, featureInstance })
+    await operation({ request, feature, featureInstance, classFeature, })
     cache[featureId] = 2
   } catch (e) {
     console.error(`Feature > ${featureId} > ${operationName}`, e.message)

@@ -1,4 +1,4 @@
-import performItem from './performItem.js'
+import performClassFeature from './performClassFeature.js'
 import adaptFeaturePayload from '../../../../../../utils/adaptFeaturePayload.js'
 
 export default async ({
@@ -20,28 +20,28 @@ export default async ({
   }
 
   const { className } = object
-  let items = await feature.loader.classFeatures({ className })
-  if (!items || !items.length) {
+  let classFeatures = await feature.loader.classFeatures({ className })
+  if (!classFeatures || !classFeatures.length) {
     return
   }
 
-  items = items.map(adaptFeaturePayload)
+  classFeatures = classFeatures.map(adaptFeaturePayload)
 
   // const items = object.constructor.features
   //     ? object.constructor.features.map(adaptFeaturePayload)
   //     : []
 
   const cache = {}
-  for (var i in items) {
-    const item = items[i]
-    await performItem({
+  for (var i in classFeatures) {
+    const classFeature = classFeatures[i]
+    await performClassFeature({
       allFeatures,
       feature,
       featureInstance,
       request,
       operationName,
-      items,
-      item,
+      classFeatures,
+      classFeature,
       cache
     })
   }
