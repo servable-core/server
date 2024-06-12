@@ -5,7 +5,8 @@ export default async ({
   allFeatures,
   feature,
   request,
-  operationName
+  operationName,
+  featureInstance,
 }) => {
 
   const { object } = request
@@ -36,6 +37,7 @@ export default async ({
     await performItem({
       allFeatures,
       feature,
+      featureInstance,
       request,
       operationName,
       items,

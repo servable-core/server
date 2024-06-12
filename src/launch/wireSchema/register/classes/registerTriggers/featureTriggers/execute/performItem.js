@@ -7,6 +7,7 @@ const perform = async ({
   cache,
   operationName,
   feature,
+  featureInstance,
   request }) => {
 
   const featureId = _.isObject(item) ? item.id : item
@@ -37,6 +38,7 @@ const perform = async ({
     return doPerform({
       request,
       feature,
+      featureInstance,
       operation,
       featureId,
       operationName,
@@ -65,6 +67,7 @@ const perform = async ({
       cache,
       operationName,
       feature,
+      featureInstance,
       request,
       item: candidate
     })
@@ -73,6 +76,7 @@ const perform = async ({
   return doPerform({
     request,
     feature,
+    featureInstance,
     operation,
     featureId,
     operationName,
@@ -83,13 +87,14 @@ const perform = async ({
 const doPerform = async ({
   request,
   feature,
+  featureInstance,
   cache,
   operation,
   featureId,
   operationName }) => {
   try {
     cache[featureId] = 1
-    await operation({ request, feature, })
+    await operation({ request, feature, featureInstance })
     cache[featureId] = 2
   } catch (e) {
     console.error(`Feature > ${featureId} > ${operationName}`, e.message)

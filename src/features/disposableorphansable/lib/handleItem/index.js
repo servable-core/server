@@ -13,6 +13,18 @@ export default async ({ object, field }) => {
     return
   }
 
+  if (objects.constructor && objects.constructor.name === 'ParseRelation') {
+    const query = objects.query()
+    await query.each(async a => {
+      try {
+        await a.destroy({ useMasterKey: true })
+      } catch (e) {
+        console.error('[disposableorphansable] destroy relation', e.message)
+      }
+    })
+    return
+  }
+
   if (!Array.isArray(objects)) {
     objects = [objects].filter(a => a)
   }

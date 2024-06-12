@@ -10,7 +10,7 @@ export default async ({
   allFeatures
 }) => {
 
-  const prefix = feature.id === 'app' ? null : feature.id
+  const prefix = feature._id === 'app' ? null : feature._id
 
   const functions = await feature.loader.functions()
   await registerCloudCode({ files: functions, prefix })
