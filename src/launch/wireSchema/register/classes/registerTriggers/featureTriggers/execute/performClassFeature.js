@@ -1,7 +1,7 @@
 import _ from 'underscore'
 
 const perform = async ({
-  classFeature,
+  featureParams,
   allFeatures,
   classFeatures,
   cache,
@@ -10,7 +10,7 @@ const perform = async ({
   featureInstance,
   request }) => {
 
-  const featureId = _.isObject(classFeature) ? classFeature.id : classFeature
+  const featureId = _.isObject(featureParams) ? featureParams.id : featureParams
   if (cache[featureId] === 1 || cache[featureId] === 2 || cache[featureId] === 3) {
     return
   }
@@ -38,7 +38,7 @@ const perform = async ({
     return doPerform({
       request,
       feature,
-      classFeature,
+      featureParams,
       featureInstance,
       operation,
       featureId,
@@ -70,14 +70,14 @@ const perform = async ({
       feature,
       featureInstance,
       request,
-      classFeature: candidate
+      featureParams: candidate
     })
   }
 
   return doPerform({
     request,
     feature,
-    classFeature,
+    featureParams,
     featureInstance,
     operation,
     featureId,
@@ -90,14 +90,14 @@ const doPerform = async ({
   request,
   feature,
   featureInstance,
-  classFeature,
+  featureParams,
   cache,
   operation,
   featureId,
   operationName }) => {
   try {
     cache[featureId] = 1
-    await operation({ request, feature, featureInstance, classFeature, })
+    await operation({ request, feature, featureInstance, featureParams, })
     cache[featureId] = 2
   } catch (e) {
     console.error(`Feature > ${featureId} > ${operationName}`, e.message)

@@ -33,7 +33,7 @@ export default async ({
 
   const cache = {}
   for (var i in classFeatures) {
-    const classFeature = classFeatures[i]
+    const featureParams = classFeatures[i]
     await performClassFeature({
       allFeatures,
       feature,
@@ -41,7 +41,7 @@ export default async ({
       request,
       operationName,
       classFeatures,
-      classFeature,
+      featureParams,
       cache
     })
   }
