@@ -9,35 +9,43 @@ import localeIsMet from './lib/isMet/locale/index.js'
 
 export default class ServableConfigConditionType extends Servable.App.Object {
 
-    constructor() {
-        super('ServableConfigConditionType')
+  constructor() {
+    super('ServableConfigConditionType')
+  }
+
+  /* #region disposablechildrenable */
+  disposableChildren() {
+    const items = super.disposableChildren ? super.disposableChildren() : []
+    return [
+      ...items,
+
+    ]
+  }
+  /* #endregion */
+
+  /* #region disposableorphansable */
+  disposableOrphans = () => {
+    const items = super.disposableOrphans ? super.disposableOrphans() : []
+    return [
+      ...items,
+
+    ]
+  }
+  /* #endregion */
+
+  async isMet(props) {
+    const { user, installation } = props
+    const type = this.get('type')
+    switch (type) {
+      case 'platform': {
+        return platformIsMet({ conditionType: this, ...props })
+      }
+      case 'locale': {
+        return localeIsMet({ conditionType: this, ...props })
+      }
+      default: {
+        return false
+      }
     }
-
-    /* #region disposablechildrenable */
-    disposableChildren = () => ([
-
-    ])
-    /* #endregion */
-
-    /* #region disposableorphansable */
-    disposableOrphans = () => ([
-
-    ])
-    /* #endregion */
-
-    async isMet(props) {
-        const { user, installation } = props
-        const type = this.get('type')
-        switch (type) {
-            case 'platform': {
-                return platformIsMet({ conditionType: this, ...props })
-            }
-            case 'locale': {
-                return localeIsMet({ conditionType: this, ...props })
-            }
-            default: {
-                return false
-            }
-        }
-    }
+  }
 }

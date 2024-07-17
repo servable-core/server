@@ -2,19 +2,27 @@
 
 export default class ServableConfigGroup extends Servable.App.Object {
 
-    constructor() {
-        super('ServableConfigGroup')
-    }
+  constructor() {
+    super('ServableConfigGroup')
+  }
 
-    /* #region disposablechildrenable */
-    disposableChildren = () => ([
+  /* #region disposablechildrenable */
+  disposableChildren() {
+    const items = super.disposableChildren ? super.disposableChildren() : []
+    return [
+      ...items,
 
-    ])
-    /* #endregion */
+    ]
+  }
+  /* #endregion */
 
-    /* #region disposableorphansable */
-    disposableOrphans = () => ([
+  /* #region disposableorphansable */
+  disposableOrphans = () => {
+    const items = super.disposableOrphans ? super.disposableOrphans() : []
+    return [
+      ...items,
 
-    ])
-    /* #endregion */
+    ]
+  }
+  /* #endregion */
 }
