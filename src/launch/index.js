@@ -15,13 +15,19 @@ import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
 
-export default async props => {
+/**
+* @description
+* @param {Object} object
+* @param {Object} object.servableConfig -  Servable Config
+* @param {Object} object.engine -  Servable engine to use
+*/
+
+export default async ({ servableConfig, engine }) => {
   // const heapDiff = new memwatch.HeapDiff()
   console.log("[Servable]", '[DEBUG]', `launch > entry`,)
 
   try {
 
-    const { servableConfig, engine } = props
     adaptConfig({ servableConfig, engine })
 
     global.Servable = new ServableClass()
