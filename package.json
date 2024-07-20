@@ -73,6 +73,7 @@
   "dependencies": {
     "@servable/tools": "^1.1.6",
     "agenda": "*",
+    "axios": "^1.7.2",
     "docker-compose": "0.24.1",
     "get-port": "^6.1.2",
     "js-sha256": "^0.9.0",

@@ -1,4 +1,5 @@
 import validate from './validate.js'
+import userResolver from "./utils/userResolver.js"
 
 export default async ({
   route,
@@ -12,7 +13,12 @@ export default async ({
   if (route.path.indexOf(targetPlaceholder) === -1) {
     return Servable.App.Route.define({
       ...route,
-      path: route.path.toLowerCase()
+      path: route.path.toLowerCase(),
+      servableArguments: async ({ request, response, native }) => ({
+        userResolver: async ({ options = {} } = {}) => {
+          return userResolver({ request, options })
+        }
+      })
     })
   }
 
