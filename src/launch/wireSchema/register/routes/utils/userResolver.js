@@ -5,7 +5,7 @@ export default async ({
   options
 }) => {
 
-  const { usersession, } = request.query
+  const { usersession, } = request.headers
 
   if (!usersession) {
     return null
