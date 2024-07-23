@@ -3,6 +3,7 @@ import registerRoutes from './routes/index.js'
 import registerJobs from './jobs/index.js'
 import registerClasses from "./classes/index.js"
 import registerServices from "./services/index.js"
+import registerLiveQueries from "./livequeries/index.js"
 
 export default async ({
   feature,
@@ -23,6 +24,9 @@ export default async ({
 
   const services = await feature.loader.services()
   await registerServices({ files: services, feature })
+
+  const liveQueries = await feature.loader.liveQueries()
+  await registerLiveQueries({ files: liveQueries, feature })
 
   //#TODO: feature.schema
   const { classes: { managed: managedClasses }, } = feature.schema

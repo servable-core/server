@@ -5,9 +5,9 @@ export default async ({
   options
 }) => {
 
-  const { usersession, } = request.headers
+  const { sessiontoken, } = request.headers
 
-  if (!usersession) {
+  if (!sessiontoken) {
     return null
   }
 
@@ -20,7 +20,7 @@ export default async ({
       headers: {
         "content-type": "application/json",
         "X-Parse-Application-Id": process.env.SERVABLE_APP_ID,
-        "X-Parse-Session-Token": usersession,
+        "X-Parse-Session-Token": sessiontoken,
         "X-Parse-Master-Key": process.env.SERVABLE_MASTER_KEY
       },
       params: {

@@ -10,8 +10,8 @@ import adaptConfig from "../lib/adaptConfig/index.js"
 import printEnd from './_messages/end.js'
 import launchSystem from "./system/index.js"
 import config from "./config/index.js"
-// import { buildSchema, validateSchema } from '@servable/tools'
-import { buildSchema, validateSchema } from '../../../tools/src/index.js'
+import { buildSchema, validateSchema } from '@servable/tools'
+// import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
 
@@ -106,14 +106,15 @@ export default async ({ servableConfig, engine }) => {
     await registerClasses({
       schema
     })
-    await wireSchema({
-      schema,
-      servableConfig
-    })
     await liveServer({
       httpServer,
       engine
     })
+    await wireSchema({
+      schema,
+      servableConfig
+    })
+
     await seed({
       server,
       schema,
