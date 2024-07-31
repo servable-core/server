@@ -15,8 +15,8 @@ export default async ({
       ...route,
       path: route.path.toLowerCase(),
       servableArguments: async ({ request, response, native }) => ({
-        userResolver: async ({ options = {} } = {}) => {
-          return userResolver({ request, options })
+        userResolver: async ({ request: _request, options = {} } = {}) => {
+          return userResolver({ request: _request ? _request : request, options })
         }
       })
     })
