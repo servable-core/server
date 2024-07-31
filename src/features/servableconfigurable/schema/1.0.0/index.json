@@ -17,7 +17,7 @@
                         "type": "Array"
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -72,7 +72,7 @@
                         "type": "Boolean"
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -136,7 +136,7 @@
                         "type": "Object"
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -188,7 +188,7 @@
                         "defaultValue": true
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -257,7 +257,7 @@
                         "type": "Number"
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -312,7 +312,7 @@
                         "type": "Boolean"
                     }
                 },
-                "classLevelPermissions": {
+                "classLevelPermissions_": {
                     "find": {
                         "requiresAuthentication": true
                     },
@@ -347,7 +347,7 @@
         ]
     },
     "target": {
-        "classLevelPermissions": {
+        "classLevelPermissions_": {
             "protectedFields": {
                 "*": []
             }
