@@ -1,9 +1,9 @@
 import validate from './validate.js'
 import userResolver from "./utils/userResolver.js"
-
 export default async ({
   route,
-  feature }) => {
+  feature,
+  prefix = '' }) => {
 
   if (!validate({ route })) {
     return
@@ -11,9 +11,13 @@ export default async ({
 
   const targetPlaceholder = '{{$target}}'
   if (route.path.indexOf(targetPlaceholder) === -1) {
+    let path = route.path.toLowerCase()
+
+
     return Servable.App.Route.define({
       ...route,
-      path: route.path.toLowerCase(),
+      prefix,
+      path,
       servableArguments: async ({ request, response, native }) => ({
         userResolver: async ({ request: _request, options = {} } = {}) => {
           return userResolver({ request: _request ? _request : request, options })
@@ -26,10 +30,13 @@ export default async ({
   for (var i in instancesClassesPayloads) {
     const instancesClassesPayload = instancesClassesPayloads[i]
     const { instance } = instancesClassesPayload
-    const path = route.path.replace(targetPlaceholder, instance.className)
+    let path = route.path.replace(targetPlaceholder, instance.className)
+    path = path.toLowerCase()
+
     const _item = {
-      ...route, path:
-        path.toLowerCase()
+      ...route,
+      path,
+      prefix,
     }
     Servable.App.Route.define(_item)
   }
