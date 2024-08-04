@@ -152,6 +152,20 @@ export default async ({ servableConfig, engine }) => {
 
     Servable.App.Route.define({
       method: "get",
+      cache: {
+        type: "inMemory",
+        params: {
+          window: 10
+        }
+      },
+      rateLimiting: {
+        type: "fixedByIp",
+        params: {
+          limit: 100,
+          window: 1 * 1000,
+          message: 'Too many requests'
+        }
+      },
       paths: ['/health-check', '/healthcheck'],
       handler: async () => "Health check passed"
     })
