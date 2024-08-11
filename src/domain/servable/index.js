@@ -2,8 +2,8 @@ import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
 import LiveQueries from './livequeries/index.js'
-// import { Domain } from '@servable/tools'
-import { Domain } from '../../../../tools/src/index.js'
+import { Domain } from '@servable/tools'
+// import { Domain } from '../../../../tools/src/index.js'
 
 const { Servable: BaseClass } = Domain
 
