@@ -6,7 +6,6 @@ const MAX_ATTEMPTS = 5
 const MAX_DURATION = 10 //in second
 
 import MigrationStateEnum from '../../../../../lib/utilsDatabase/classes/parseServerState/enums/migrationState.js'
-import ValidationStateEnum from '../../../../../lib/utilsDatabase/classes/parseServerState/enums/validationState.js'
 
 
 export default async (props) => {
@@ -62,7 +61,7 @@ export default async (props) => {
 
   switch (productionStateItem.migrationState) {
     case MigrationStateEnum.Initial: {
-      // if (!stateItem.features) {
+      // if (!stateItem.protocols) {
       //   return {
       //     stateItem,
       //     configuration,

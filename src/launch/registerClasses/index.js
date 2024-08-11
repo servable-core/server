@@ -1,14 +1,14 @@
-import registerFeature from "./registerFeature/index.js"
+import registerProtocol from "./registerProtocol/index.js"
 
 export default async ({ schema }) => {
   const {
-    features
+    protocols
   } = schema
   console.log("[Servable]", `Launch > Register class > Start`)
-  await Promise.all(features.map(async feature => {
-    await registerFeature({
-      feature,
-      allFeatures: features,
+  await Promise.all(protocols.map(async protocol => {
+    await registerProtocol({
+      protocol,
+      allProtocols: protocols,
     })
   }))
   console.log("[Servable]", `Launch > Register class > Success`)

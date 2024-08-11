@@ -61,7 +61,7 @@ export default async (props) => {
         stateItem,
         configuration,
         migrations,
-        shouldMigrate: ((migrations && migrations.length) || !stateItem.features),
+        shouldMigrate: ((migrations && migrations.length) || !stateItem.protocols),
       }
     }
     case MigrationStateEnum.Loading: {

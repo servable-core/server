@@ -1,21 +1,21 @@
-import handleFeature from "./handleFeature/index.js"
+import handleProtocol from "./handleProtocol/index.js"
 
 export default async ({ app, schema, configuration, server, servableConfig, engine }) => {
 
   const {
-    features
+    protocols
   } = schema
   console.log("[Servable]", `Launch > After init > Start`)
-  await Promise.all(features.map(async feature => {
-    await handleFeature({
+  await Promise.all(protocols.map(async protocol => {
+    await handleProtocol({
       app,
       schema,
       configuration,
       server,
       servableConfig,
       engine,
-      feature,
-      allFeatures: features
+      protocol,
+      allProtocols: protocols
     })
   }))
   console.log("[Servable]", `Launch > After init > Success`)

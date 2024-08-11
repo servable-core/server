@@ -1,16 +1,16 @@
-import featureCandidates from "./featureCandidates/index.js"
+import protocolCandidates from "./protocolCandidates/index.js"
 import _ from 'underscore'
 
 export default async (props) => {
   const { schema } = props
   const {
-    features
+    protocols
   } = schema
 
-  const items = _.flatten(await Promise.all(features.map(async item =>
-    featureCandidates({
+  const items = _.flatten(await Promise.all(protocols.map(async item =>
+    protocolCandidates({
       item,
-      allFeatures: features
+      allProtocols: protocols
     })
   ))).filter(a => a)
 

@@ -3,7 +3,7 @@ import registerItem from './registerItem.js'
 export default async ({
   files,
   servableConfig,
-  feature
+  protocol
 }) => {
 
   if (!files || !files.length) {
@@ -15,7 +15,7 @@ export default async ({
     return registerItem({
       liveQuery,
       servableConfig,
-      feature
+      protocol
     })
   }))
 }

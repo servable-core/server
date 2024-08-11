@@ -5,11 +5,11 @@ import { diff } from 'json-diff'
 export default async (props) => {
   const { a, b } = props
 
-  //#TODO: Handle deleted features
+  //#TODO: Handle deleted protocols
   const items = b.map(to => {
     const from = _.findWhere(a, { id: to.id })
     if (!from) {
-      //#TODO: to fix bugs for no migration when the feature is new
+      //#TODO: to fix bugs for no migration when the protocol is new
       return {
         to,
         from: to,

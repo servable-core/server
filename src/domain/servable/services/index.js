@@ -10,7 +10,7 @@ export default class Intercom {
 
   }
 
-  async register({ service, feature }) {
+  async register({ service, protocol }) {
     const { id, version = DEFAULT_SERVICE_VERSION } = service
     const candidate = _.findWhere(this.items, { id, version })
     if (candidate) {
@@ -19,10 +19,10 @@ export default class Intercom {
     const _service = {
       ...service,
       version: service.version ? service.version : DEFAULT_SERVICE_VERSION,
-      feature //#TODO: don't retain feature
+      protocol //#TODO: don't retain protocol
     }
     this.items.push(_service)
-    await _service.register({ feature })
+    await _service.register({ protocol })
   }
 
 
@@ -36,7 +36,7 @@ export default class Intercom {
       return new Error("Could not find designated service.")
     }
 
-    //#TODO: don't retain feature
-    return service.handler({ params, feature: service.feature })
+    //#TODO: don't retain protocol
+    return service.handler({ params, protocol: service.protocol })
   }
 }

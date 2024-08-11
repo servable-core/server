@@ -41,23 +41,23 @@ export default ({ servableConfig }) => {
     }
   }
 
-  if (!servableConfig.features) {
-    servableConfig.features = {}
+  if (!servableConfig.protocols) {
+    servableConfig.protocols = {}
   }
 
-  if (!servableConfig.features.local || !servableConfig.features.local.length) {
-    servableConfig.features.local = [
-      path.resolve('', 'features')
+  if (!servableConfig.protocols.local || !servableConfig.protocols.local.length) {
+    servableConfig.protocols.local = [
+      path.resolve('', 'protocols')
     ]
   }
 
-  servableConfig.features.local = [
-    path.resolve(__dirname, `../../features`),
-    ...servableConfig.features.local,
+  servableConfig.protocols.local = [
+    path.resolve(__dirname, `../../protocols`),
+    ...servableConfig.protocols.local,
   ]
 
-  if (!servableConfig.rootFeaturePayload) {
-    servableConfig.rootFeaturePayload = {
+  if (!servableConfig.rootProtocolPayload) {
+    servableConfig.rootProtocolPayload = {
       type: 'app',
       id: 'app',
       // path: path.resolve(__dirname, "./app")
@@ -65,17 +65,17 @@ export default ({ servableConfig }) => {
     }
   }
 
-  if (!servableConfig.rootFeaturePayload.path) {
-    servableConfig.rootFeaturePayload = {
-      ...servableConfig.rootFeaturePayload,
+  if (!servableConfig.rootProtocolPayload.path) {
+    servableConfig.rootProtocolPayload = {
+      ...servableConfig.rootProtocolPayload,
       path: path.resolve('', 'app')
       // path: path.resolve(__dirname, "./app")
     }
   }
 
-  if (!servableConfig.rootFeaturePayload.id || !servableConfig.rootFeaturePayload.type) {
-    servableConfig.rootFeaturePayload = {
-      ...servableConfig.rootFeaturePayload,
+  if (!servableConfig.rootProtocolPayload.id || !servableConfig.rootProtocolPayload.type) {
+    servableConfig.rootProtocolPayload = {
+      ...servableConfig.rootProtocolPayload,
       id: 'app',
       type: 'app',
     }

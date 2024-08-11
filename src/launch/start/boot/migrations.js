@@ -1,23 +1,23 @@
 import getMigrationsPayload from "../migrationsPayload/index.js"
-import adaptFeatures from "../utils/adaptFeatures.js"
+import adaptProtocols from "../utils/adaptProtocols.js"
 // Import { sha256, } from 'js-sha256'
 
 export default async ({ schema, stateItem }) => {
-  const storedFeaturesStruct = stateItem.features
-    ? JSON.parse(stateItem.features)
+  const storedProtocolsStruct = stateItem.protocols
+    ? JSON.parse(stateItem.protocols)
     : null
-  // Const s = sha256(JSON.stringify(storedFeaturesStruct))
+  // Const s = sha256(JSON.stringify(storedProtocolsStruct))
 
-  const targetFeaturesStruct = await adaptFeatures({
-    features: schema.features
+  const targetProtocolsStruct = await adaptProtocols({
+    protocols: schema.protocols
   })
-  // Const t = sha256(JSON.stringify(targetFeaturesStruct))
+  // Const t = sha256(JSON.stringify(targetProtocolsStruct))
 
 
   const items = await getMigrationsPayload({
-    a: storedFeaturesStruct,
-    b: targetFeaturesStruct,
-    features: schema.features
+    a: storedProtocolsStruct,
+    b: targetProtocolsStruct,
+    protocols: schema.protocols
   })
 
   return items

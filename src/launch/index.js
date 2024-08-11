@@ -10,8 +10,8 @@ import adaptConfig from "../lib/adaptConfig/index.js"
 import printEnd from './_messages/end.js'
 import launchSystem from "./system/index.js"
 import config from "./config/index.js"
-import { buildSchema, validateSchema } from '@servable/tools'
-// import { buildSchema, validateSchema } from '../../../tools/src/index.js'
+// import { buildSchema, validateSchema } from '@servable/tools'
+import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
 
@@ -24,7 +24,7 @@ import { buildSchema, validateSchema } from '@servable/tools'
 
 export default async ({ servableConfig, engine }) => {
   // const heapDiff = new memwatch.HeapDiff()
-  console.log("[Servable]", '[DEBUG]', `launch > entry`,)
+  // Servable.Console.log("[Servable]", '[DEBUG]', `launch > entry`,)
 
   try {
 
@@ -33,12 +33,12 @@ export default async ({ servableConfig, engine }) => {
     global.Servable = new ServableClass()
 
 
-    // console.log("[Servable]", '[DEBUG]', `Launch > Start`,)
+    // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > Start`,)
 
     const app = await engine.createApp({ servableConfig })
     await global.Servable.hydrate({ servableConfig, engine, app })
     // Servable.Express.app = app
-    // console.log("[Servable]", '[DEBUG]', `Launch > created an expres app`, Servable.Express.app)
+    // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > created an expres app`, Servable.Express.app)
 
     const staticSchema = await buildSchema({ servableConfig })
     console.info("[Servable]", staticSchema)
@@ -55,16 +55,16 @@ export default async ({ servableConfig, engine }) => {
       engine
     })
 
-    // console.log("[Servable]", '[DEBUG]', `servableConfig`, servableConfig)
+    // Servable.Console.log("[Servable]", '[DEBUG]', `servableConfig`, servableConfig)
 
 
     const httpServer = await engine.createHttpServer({ app })
     Servable.httpServer = httpServer
-    // console.log("[Servable]", '[DEBUG]', `Launch > created a http server`)
+    // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > created a http server`)
 
 
 
-    // console.log("[Servable]", '[DEBUG]', `Launch > starting the parse server`)
+    // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > starting the parse server`)
     const serverStruct = await start({
       app,
       servableConfig,
@@ -72,27 +72,27 @@ export default async ({ servableConfig, engine }) => {
       engine
     })
     if (!serverStruct) {
-      console.log("[Servable]", '[DEBUG]', `Launch > failed creating the parse server`)
+      Servable.Console.log("[Servable]", '[DEBUG]', `Launch > failed creating the parse server`)
       return
     }
 
     // await mockDocumentation({ schema: _schema })
 
-    // console.log("[Servable]", `Launch > started the parse server`)
+    // Servable.Console.log("[Servable]", `Launch > started the parse server`)
 
 
     const { schema, server, configuration } = serverStruct
-    // console.log('servableConfig', servableConfig, 'serverStruct', serverStruct,)
-    // console.log("[Servable]", 'features.length>>', schema.features.length,)
-    // console.log('features _schema', _schema.features.length, _schema.features)
+    // Servable.Console.log('servableConfig', servableConfig, 'serverStruct', serverStruct,)
+    // Servable.Console.log("[Servable]", 'protocols.length>>', schema.protocols.length,)
+    // Servable.Console.log('protocols _schema', _schema.protocols.length, _schema.protocols)
 
     if (configuration.params.skipWiring) {
-      console.log("[Servable]", "Finished launching a configuration that doesnt require wiring")
+      Servable.Console.log("[Servable]", "Finished launching a configuration that doesnt require wiring")
       return
     }
 
     Servable.publicUrl = configuration.config.parse.publicServerURL
-    console.log("[Servable]", `Launch > set public server url (with mount)`, Servable.publicServerURL)
+    Servable.Console.log("[Servable]", `Launch > set public server url (with mount)`, Servable.publicServerURL)
     /////////////////////////////
 
     await beforeInit({
@@ -146,8 +146,8 @@ export default async ({ servableConfig, engine }) => {
 
 
     // const i = await Servable.Config.get('defaultLocale', { locale: "en_US" })
-    // const a = await Servable.Config.get('defaultLocale', { locale: "en_US", object: null, feature: { id: 'countryable' } })
-    // console.log("[Servable]", '--------Config:', i)
+    // const a = await Servable.Config.get('defaultLocale', { locale: "en_US", object: null, protocol: { id: 'countryable' } })
+    // Servable.Console.log("[Servable]", '--------Config:', i)
     printEnd()
 
     Servable.App.Route.define({
@@ -181,6 +181,6 @@ export default async ({ servableConfig, engine }) => {
   }
   finally {
     // const diff = heapDiff.end()
-    // console.log('[SERVABLE]', '[PERFORMANCE]', 'launch>heapdiff', diff)
+    // Servable.Console.log('[SERVABLE]', '[PERFORMANCE]', 'launch>heapdiff', diff)
   }
 }

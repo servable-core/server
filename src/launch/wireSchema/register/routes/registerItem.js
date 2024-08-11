@@ -2,7 +2,7 @@ import validate from './validate.js'
 import userResolver from "./utils/userResolver.js"
 export default async ({
   route,
-  feature,
+  protocol,
   prefix = '' }) => {
 
   if (!validate({ route })) {
@@ -26,7 +26,7 @@ export default async ({
     })
   }
 
-  const instancesClassesPayloads = feature.instancesClassesPayloads()
+  const instancesClassesPayloads = protocol.instancesClassesPayloads()
   for (var i in instancesClassesPayloads) {
     const instancesClassesPayload = instancesClassesPayloads[i]
     const { instance } = instancesClassesPayload

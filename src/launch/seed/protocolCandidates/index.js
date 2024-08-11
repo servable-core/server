@@ -1,37 +1,37 @@
 
-export default async ({ feature }) => {
-  //#TODO: feature.schema
-  const { classes: { managed }, } = feature.schema
-  const id = feature.id
+export default async ({ protocol }) => {
+  //#TODO: protocol.schema
+  const { classes: { managed }, } = protocol.schema
+  const id = protocol.id
 
   let items = []
 
-  let featureMode = await feature.loader.seedMode()
-  switch (featureMode) {
+  let protocolMode = await protocol.loader.seedMode()
+  switch (protocolMode) {
     case 'auto': {
-      let path = feature.loader.seedFolder()
-      let featureMetadata = await feature.loader.seedMetadata()
+      let path = protocol.loader.seedFolder()
+      let protocolMetadata = await protocol.loader.seedMetadata()
       const _i = {
-        feature: feature,
+        protocol: protocol,
         id,
-        type: 'feature',
+        type: 'protocol',
         mode: 'auto',
         path,
-        metadata: featureMetadata
+        metadata: protocolMetadata
       }
 
       items.push(_i)
     } break
     case 'manual': {
-      let featureFile = await feature.loader.seedManual()
-      let featureMetadata = await feature.loader.seedMetadata()
+      let protocolFile = await protocol.loader.seedManual()
+      let protocolMetadata = await protocol.loader.seedMetadata()
       const _i = {
-        feature: feature,
+        protocol: protocol,
         id,
-        type: 'feature',
+        type: 'protocol',
         mode: 'manual',
-        file: featureFile,
-        metadata: featureMetadata
+        file: protocolFile,
+        metadata: protocolMetadata
       }
 
       items.push(_i)
@@ -41,14 +41,14 @@ export default async ({ feature }) => {
 
   await Promise.all(managed.map(async item => {
     const { className } = item
-    let classMode = await feature.loader.classSeedMode({ className })
+    let classMode = await protocol.loader.classSeedMode({ className })
     switch (classMode) {
       case 'auto': {
-        let path = feature.loader.classSeedFolder({ className })
-        let files = await feature.loader.classSeedAutoFiles({ className })
-        let metadata = await feature.loader.classSeedMetadata({ className })
+        let path = protocol.loader.classSeedFolder({ className })
+        let files = await protocol.loader.classSeedAutoFiles({ className })
+        let metadata = await protocol.loader.classSeedMetadata({ className })
         const _i = {
-          feature: feature,
+          protocol: protocol,
           id: className,
           type: 'class',
           metadata,
@@ -59,13 +59,13 @@ export default async ({ feature }) => {
         items.push(_i)
       } break
       case 'manual': {
-        let file = await feature.loader.classSeedManual({ className })
-        let metadata = await feature.loader.classSeedMetadata({
+        let file = await protocol.loader.classSeedManual({ className })
+        let metadata = await protocol.loader.classSeedMetadata({
           className
         })
 
         items.push({
-          feature: feature,
+          protocol: protocol,
           id: className,
           type: 'class',
           mode: 'manual',

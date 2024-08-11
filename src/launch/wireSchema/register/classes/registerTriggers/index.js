@@ -1,10 +1,10 @@
-import * as FeatureTriggers from './featureTriggers/index.js'
+import * as ProtocolTriggers from './protocolTriggers/index.js'
 
 export default async ({
   _class,
-  feature,
-  featureInstance,
-  allFeatures
+  protocol,
+  protocolInstance,
+  allProtocols
 }) => {
   try {
     const { className } = _class
@@ -13,16 +13,16 @@ export default async ({
       return
     }
 
-    const classTriggers = await feature.loader.classTriggers({ className })
+    const classTriggers = await protocol.loader.classTriggers({ className })
     if (!classTriggers) {
       // return
     }
 
     Servable.App.Cloud.beforeSave(className, async (request) => {
       try {
-        await FeatureTriggers.beforeSave({ request, feature, featureInstance, allFeatures })
-        classTriggers && classTriggers.beforeSave && await classTriggers.beforeSave({ request, feature, featureInstance })
-        classTriggers && classTriggers.beforesave && await classTriggers.beforesave({ request, feature, featureInstance })
+        await ProtocolTriggers.beforeSave({ request, protocol, protocolInstance, allProtocols })
+        classTriggers && classTriggers.beforeSave && await classTriggers.beforeSave({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.beforesave && await classTriggers.beforesave({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeSave`, e.message)
       }
@@ -30,9 +30,9 @@ export default async ({
 
     Servable.App.Cloud.afterSave(className, async (request) => {
       try {
-        await FeatureTriggers.afterSave({ request, feature, featureInstance, allFeatures })
-        classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, feature, featureInstance })
-        classTriggers && classTriggers.aftersave && await classTriggers.aftersave({ request, feature, featureInstance })
+        await ProtocolTriggers.afterSave({ request, protocol, protocolInstance, allProtocols })
+        classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.aftersave && await classTriggers.aftersave({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterSave`, e.message)
       }
@@ -40,9 +40,9 @@ export default async ({
 
     Servable.App.Cloud.beforeDelete(className, async (request) => {
       try {
-        await FeatureTriggers.beforeDelete({ request, feature, featureInstance, allFeatures })
-        classTriggers && classTriggers.beforeDelete && await classTriggers.beforeDelete({ request, feature, featureInstance })
-        classTriggers && classTriggers.beforedelete && await classTriggers.beforedelete({ request, feature, featureInstance })
+        await ProtocolTriggers.beforeDelete({ request, protocol, protocolInstance, allProtocols })
+        classTriggers && classTriggers.beforeDelete && await classTriggers.beforeDelete({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.beforedelete && await classTriggers.beforedelete({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeDelete`, e.message)
       }
@@ -50,9 +50,9 @@ export default async ({
 
     Servable.App.Cloud.afterDelete(className, async (request) => {
       try {
-        await FeatureTriggers.afterDelete({ request, feature, featureInstance, allFeatures })
-        classTriggers && classTriggers.afterDelete && await classTriggers.afterDelete({ request, feature, featureInstance })
-        classTriggers && classTriggers.afterdelete && await classTriggers.afterdelete({ request, feature, featureInstance })
+        await ProtocolTriggers.afterDelete({ request, protocol, protocolInstance, allProtocols })
+        classTriggers && classTriggers.afterDelete && await classTriggers.afterDelete({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.afterdelete && await classTriggers.afterdelete({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterDelete`, e.message)
       }
@@ -60,8 +60,8 @@ export default async ({
 
     // Servable.App.Cloud.beforeFind(className, async (request) => {
     //   try {
-    //     await FeatureTriggers.beforeFind({ request, feature, featureInstance, allFeatures })
-    //     classTriggers && classTriggers.beforeFind && await classTriggers.beforeFind({ request, feature, featureInstance })
+    //     await ProtocolTriggers.beforeFind({ request, protocol, protocolInstance, allProtocols })
+    //     classTriggers && classTriggers.beforeFind && await classTriggers.beforeFind({ request, protocol, protocolInstance })
     //   } catch (e) {
     //     console.error(`[Class ${className}] ⚠️ beforeFind`, e.message)
     //   }
@@ -69,8 +69,8 @@ export default async ({
 
     // Servable.App.Cloud.afterFind(className, async (request) => {
     //   try {
-    //     await FeatureTriggers.afterFind({ request, feature, featureInstance, allFeatures })
-    //     classTriggers && classTriggers.afterFind && await classTriggers.afterFind({ request, feature, featureInstance })
+    //     await ProtocolTriggers.afterFind({ request, protocol, protocolInstance, allProtocols })
+    //     classTriggers && classTriggers.afterFind && await classTriggers.afterFind({ request, protocol, protocolInstance })
     //   } catch (e) {
     //     console.error(`[Class ${className}] ⚠️ afterFind`, e.message)
     //   }

@@ -1,6 +1,6 @@
 import didMigrateStepSuccessfully from '../../launchers/auxiliary/didMigrateStepSuccessfully/index.js'
-import { buildSchema } from '@servable/tools'
-// import { buildSchema } from '../../../../../../tools/src/index.js'
+// import { buildSchema } from '@servable/tools'
+import { buildSchema } from '../../../../../../tools/src/index.js'
 import handleTask from './handleTask.js'
 
 export default async (props) => {
@@ -16,25 +16,25 @@ export default async (props) => {
   do {
     const {
       direction,
-      feature,
+      protocol,
       operations
     } = migrationPayload[i]
 
     for (var j in operations) {
       const operation = operations[j]
-      const { featuresExcerpt } = schema
+      const { protocolsExcerpt } = schema
       await handleTask({
         operation,
         direction,
         taskProps: {
-          featuresExcerpt,
+          protocolsExcerpt,
           configuration,
         }
       })
 
 
       let _servableConfig = { ...servableConfig, versions: {} }
-      _servableConfig.versions[feature.id] = operation.version
+      _servableConfig.versions[protocol.id] = operation.version
       schema = await buildSchema({ servableConfig: _servableConfig })
       //#TODO:
       // const { isValid, issues, message } = await validateSchema({ schema: staticSchema })

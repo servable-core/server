@@ -14,16 +14,16 @@ export default async (props) => {
     return null
   }
 
-  const { features } = props
+  const { protocols } = props
 
   let items = await Promise.all(payload.map(async payload => {
-    const feature = _.findWhere(features, { id: payload.from.id })
-    if (!feature) {
+    const protocol = _.findWhere(protocols, { id: payload.from.id })
+    if (!protocol) {
       return null
     }
     return computeOperations({
       payload,
-      feature
+      protocol
     })
   }))
 

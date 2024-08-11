@@ -2,11 +2,11 @@ import validate from './validate.js'
 
 export default async ({
   liveQuery,
-  feature }) => {
+  protocol }) => {
 
   if (!validate({ liveQuery })) {
     return
   }
 
-  await Servable.LiveQueries.register({ liveQuery, feature })
+  await Servable.LiveQueries.register({ liveQuery, protocol })
 }

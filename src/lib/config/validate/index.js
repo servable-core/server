@@ -1,5 +1,5 @@
-import feature from "./feature/index.js"
+import protocol from "./protocol/index.js"
 
 export default async ({ items }) => {
-  return Promise.all(items.map(item => feature({ item })))
+  return Promise.all(items.map(item => protocol({ item })))
 }

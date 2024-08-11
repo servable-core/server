@@ -1,15 +1,15 @@
-import registerFeature from "./register/index.js"
+import registerProtocol from "./register/index.js"
 
 export default async ({ schema, servableConfig }) => {
   const {
-    features
+    protocols
   } = schema
   console.log("[Servable]", `Launch > Wire schema > Start`)
-  await Promise.all(features.map(async feature => {
-    await registerFeature({
-      feature,
+  await Promise.all(protocols.map(async protocol => {
+    await registerProtocol({
+      protocol,
       servableConfig,
-      allFeatures: features
+      allProtocols: protocols
     })
   }))
   console.log("[Servable]", `Launch > Wire schema > Success`)

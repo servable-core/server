@@ -1,4 +1,4 @@
-import handleFeature from './handleFeature/index.js'
+import handleProtocol from './handleProtocol/index.js'
 import candidates from '../../lib/config/candidates/index.js'
 
 export default async ({ schema, configuration }) => {
@@ -7,7 +7,7 @@ export default async ({ schema, configuration }) => {
 
   for (var i in items) {
     const candidate = items[i]
-    await handleFeature({ candidate, configuration, })
+    await handleProtocol({ candidate, configuration, })
   }
 
   console.log("[Servable]", `Launch > Config > End`)

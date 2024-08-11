@@ -1,5 +1,5 @@
 import getStateForConfiguration from "../../../../../lib/utilsDatabase/classes/parseServerState/functions/stateForConfiguration.js"
-import adaptFeatures from "../../../utils/adaptFeatures.js"
+import adaptProtocols from "../../../utils/adaptProtocols.js"
 // import adaptAppConfigBeforeSave from "../../../utils/adaptAppConfigBeforeSave"
 import MigrationStateEnum from "../../../../../lib/utilsDatabase/classes/parseServerState/enums/migrationState.js"
 
@@ -9,12 +9,12 @@ export default async (props) => {
 
   const { schema, configuration } = props
   // const { config: appConfig } = configuration
-  const features = await adaptFeatures({ features: schema.features })
+  const protocols = await adaptProtocols({ protocols: schema.protocols })
 
   item.migrationState = MigrationStateEnum.Loading
-  item.classesTarget = JSON.stringify(schema.appFeature.schema.classes.all)
-  item.featuresTarget = features
-    ? JSON.stringify(features)
+  item.classesTarget = JSON.stringify(schema.appProtocol.schema.classes.all)
+  item.protocolsTarget = protocols
+    ? JSON.stringify(protocols)
     : null
 
   // item.appConfigTarget = adaptAppConfigBeforeSave(appConfig)

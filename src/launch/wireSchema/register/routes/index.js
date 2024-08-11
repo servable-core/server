@@ -4,7 +4,7 @@ export default async ({
   files,
   prefix,
   servableConfig,
-  feature
+  protocol
 }) => {
 
   if (!files) {
@@ -17,7 +17,7 @@ export default async ({
       route,
       prefix,
       servableConfig,
-      feature
+      protocol
     })
   }))
 }

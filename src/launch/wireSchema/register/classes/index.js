@@ -4,30 +4,30 @@ import registerJobs from '../jobs/index.js'
 
 export default async ({
   managedClasses,
-  feature,
-  allFeatures,
+  protocol,
+  allProtocols,
   servableConfig,
 }) => {
 
   return Promise.all(managedClasses.map(async _class => {
     await registerTriggers({
-      feature,
+      protocol,
       servableConfig,
-      allFeatures,
+      allProtocols,
       _class
     })
 
     const { className } = _class
 
-    const prefix = feature.id === 'app'
+    const prefix = protocol.id === 'app'
       ? null
-      // : `${feature.id}${capitalizeFirstLetter(className)}`
-      : `${feature.id}`
+      // : `${protocol.id}${capitalizeFirstLetter(className)}`
+      : `${protocol.id}`
 
-    const functions = await feature.loader.classFunctions({ className })
+    const functions = await protocol.loader.classFunctions({ className })
     await registerCloudCode({ files: functions, prefix })
 
-    const jobFiles = await feature.loader.classJobs({ className })
+    const jobFiles = await protocol.loader.classJobs({ className })
     await registerJobs({ files: jobFiles, prefix })
   }))
 }

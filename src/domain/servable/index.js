@@ -2,8 +2,8 @@ import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
 import LiveQueries from './livequeries/index.js'
-import { Domain } from '@servable/tools'
-// import { Domain } from '../../../../tools/src/index.js'
+// import { Domain } from '@servable/tools'
+import { Domain } from '../../../../tools/src/index.js'
 
 const { Servable: BaseClass } = Domain
 
@@ -50,7 +50,6 @@ export default class Servable extends BaseClass {
     this._express = new Express()
     this.engine = engine
     this.App = await this._engine.adaptApp({ servableConfig })
-    this.log = console.log
     this.Console = console
 
     if (this.App.Route) {
@@ -80,11 +79,11 @@ export default class Servable extends BaseClass {
   }
 
   get appClass() {
-    const { appFeature } = this.schema
+    const { appProtocol } = this.schema
     const {
       jsClasses,
       classes: { managed },
-    } = appFeature.schema
+    } = appProtocol.schema
     const appClass = jsClasses.filter(a => a.name === 'App')
     return appClass[0]
   }

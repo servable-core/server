@@ -6,20 +6,20 @@ import registerServices from "./services/index.js"
 import registerLiveQueries from "./livequeries/index.js"
 
 export default async ({
-  feature,
+  protocol,
   servableConfig,
-  allFeatures
+  allProtocols
 }) => {
 
-  const prefix = feature._id === 'app' ? null : feature._id
+  const prefix = protocol._id === 'app' ? null : protocol._id
 
-  const functions = await feature.loader.functions()
+  const functions = await protocol.loader.functions()
   await registerCloudCode({
     files: functions,
     prefix
   })
 
-  const routes = await feature.loader.routes()
+  const routes = await protocol.loader.routes()
   if (routes) {
     const keys = Object.keys(routes)
     if (keys.length) {
@@ -33,37 +33,37 @@ export default async ({
           files: items,
           prefix: key,
           servableConfig,
-          feature
+          protocol
         })
       }
     }
   }
 
 
-  const jobs = await feature.loader.jobFiles()
+  const jobs = await protocol.loader.jobFiles()
   await registerJobs({
     files: jobs,
     prefix
   })
 
-  const services = await feature.loader.services()
+  const services = await protocol.loader.services()
   await registerServices({
     files: services,
-    feature
+    protocol
   })
 
-  const liveQueries = await feature.loader.liveQueries()
+  const liveQueries = await protocol.loader.liveQueries()
   await registerLiveQueries({
     files: liveQueries,
-    feature
+    protocol
   })
 
-  //#TODO: feature.schema
-  const { classes: { managed: managedClasses }, } = feature.schema
+  //#TODO: protocol.schema
+  const { classes: { managed: managedClasses }, } = protocol.schema
   await registerClasses({
     servableConfig,
-    feature,
-    allFeatures,
+    protocol,
+    allProtocols,
     managedClasses,
   })
 }

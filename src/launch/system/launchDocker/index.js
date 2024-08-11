@@ -1,11 +1,11 @@
-import handleFeature from "./handleFeature/index.js"
+import handleProtocol from "./handleProtocol/index.js"
 import canStart from "./canStart.js"
 
 export default async ({ schema, servableConfig }) => {
 
   const {
-    features,
-    appFeature,
+    protocols,
+    appProtocol,
   } = schema
 
   if (!servableConfig.system.docker.environments.includes(process.env.NODE_ENV)) {
@@ -17,13 +17,13 @@ export default async ({ schema, servableConfig }) => {
     return
   }
 
-  const items = await Promise.all(features.map(async item => {
-    return handleFeature({
+  const items = await Promise.all(protocols.map(async item => {
+    return handleProtocol({
       schema,
       servableConfig,
       item,
-      allFeatures: features,
-      appFeature
+      allProtocols: protocols,
+      appProtocol
     })
   }))
 

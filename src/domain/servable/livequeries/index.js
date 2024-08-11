@@ -10,7 +10,7 @@ export default class LiveQueries {
 
   }
 
-  async register({ liveQuery, feature }) {
+  async register({ liveQuery, protocol }) {
     const { id, version = DEFAULT_LIVEQUERY_VERSION } = liveQuery
     const candidate = _.findWhere(this.items, { id, version })
     if (candidate) {
@@ -20,7 +20,7 @@ export default class LiveQueries {
     const _liveQuery = {
       ...liveQuery,
       version: liveQuery.version ? liveQuery.version : DEFAULT_LIVEQUERY_VERSION,
-      feature //#TODO: don't retain feature
+      protocol //#TODO: don't retain protocol
     }
     this.items.push(_liveQuery)
     const { query, } = _liveQuery

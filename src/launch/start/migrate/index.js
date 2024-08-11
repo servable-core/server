@@ -51,7 +51,7 @@ export default async (props) => {
       configuration,
       schema: _schema
     })
-    // const { featuresExcerpt } = _schema
+    // const { protocolsExcerpt } = _schema
     // await Servable.App.Config.save(null)
 
     return result

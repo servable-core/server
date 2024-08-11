@@ -1,11 +1,11 @@
-export default async ({ feature, version, direction }) => {
+export default async ({ protocol, version, direction }) => {
 
-  const up = await feature.loader.schemaVersionOf({
+  const up = await protocol.loader.schemaVersionOf({
     version,
     subPath: 'up'
   })
 
-  const down = await feature.loader.schemaVersionOf({
+  const down = await protocol.loader.schemaVersionOf({
     version,
     subPath: 'down'
   })

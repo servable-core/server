@@ -1,27 +1,27 @@
-import featureCandidates from "./featureCandidates/index.js"
-import handleFeature from './handleFeature/index.js'
+import protocolCandidates from "./protocolCandidates/index.js"
+import handleProtocol from './handleProtocol/index.js'
 import _ from 'underscore'
 
 export default async ({ schema, configuration, operationProps }) => {
 
   const {
-    features
+    protocols
   } = schema
 
   console.log("[Servable]", `Launch > Seed > Start >`)
-  const candidates = _.flatten(await Promise.all(features.map(async feature =>
-    featureCandidates({
-      feature,
+  const candidates = _.flatten(await Promise.all(protocols.map(async protocol =>
+    protocolCandidates({
+      protocol,
     })
   ))).filter(a => a)
 
   const cache = {}
   for (var i in candidates) {
-    const feature = candidates[i]
-    await handleFeature({
+    const protocol = candidates[i]
+    await handleProtocol({
       operationProps,
-      features: candidates,
-      feature,
+      protocols: candidates,
+      protocol,
       cache,
       configuration
     })

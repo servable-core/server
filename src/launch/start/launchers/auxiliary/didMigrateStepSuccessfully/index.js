@@ -1,5 +1,5 @@
 import getStateForConfiguration from "../../../../../lib/utilsDatabase/classes/parseServerState/functions/stateForConfiguration.js"
-import adaptFeatures from "../../../utils/adaptFeatures.js"
+import adaptProtocols from "../../../utils/adaptProtocols.js"
 // import adaptAppConfigBeforeSave from "../../../utils/adaptAppConfigBeforeSave"
 
 export default async (props) => {
@@ -7,12 +7,12 @@ export default async (props) => {
 
   const { schema, configuration } = props
   // const { config: appConfig } = configuration
-  const features = await adaptFeatures({ features: schema.features })
+  const protocols = await adaptProtocols({ protocols: schema.protocols })
 
-  item.classes = JSON.stringify(schema.appFeature.schema.classes.all)
+  item.classes = JSON.stringify(schema.appProtocol.schema.classes.all)
 
-  item.features = features
-    ? JSON.stringify(features)
+  item.protocols = protocols
+    ? JSON.stringify(protocols)
     : null
 
   // item.appConfig = adaptAppConfigBeforeSave(appConfig)

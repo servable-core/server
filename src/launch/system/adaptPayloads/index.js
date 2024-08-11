@@ -1,18 +1,18 @@
-import handleFeature from "./handleFeature/index.js"
+import handleProtocol from "./handleProtocol/index.js"
 
 export default async (props) => {
   const { schema, servableConfig } = props
   const {
-    features,
-    appFeature,
+    protocols,
+    appProtocol,
   } = schema
 
-  const items = await Promise.all(features.map(async item => {
-    return handleFeature({
+  const items = await Promise.all(protocols.map(async item => {
+    return handleProtocol({
       ...props,
       item,
-      allFeatures: features,
-      appFeature
+      allProtocols: protocols,
+      appProtocol
     })
   }))
 }

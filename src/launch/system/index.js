@@ -8,7 +8,7 @@ export default async ({ schema, servableConfig, engine }) => {
 
   await adaptSystemPayloads({ schema, servableConfig })
   let payload = {}
-  const appSystem = schema.appFeature.system
+  const appSystem = schema.appProtocol.system
   if (appSystem) {
     payload = appSystem.payload
   }

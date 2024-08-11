@@ -1,10 +1,10 @@
 import semver from 'semver'
 import hydrateItem from './hydrateItem.js'
 
-export default async ({ payload, feature }) => {
+export default async ({ payload, protocol }) => {
   const { from, to, direction } = payload
 
-  let _versions = await feature.loader.schemaVersions()
+  let _versions = await protocol.loader.schemaVersions()
   if (!_versions || !_versions.length) {
     return null
   }
@@ -38,14 +38,14 @@ export default async ({ payload, feature }) => {
     return null
   }
 
-  const operations = (await Promise.all(versions.map(async version => hydrateItem({ feature, version, direction })))).filter(a => a)
+  const operations = (await Promise.all(versions.map(async version => hydrateItem({ protocol, version, direction })))).filter(a => a)
   if (!operations.length) {
     return null
   }
 
   return {
     ...payload,
-    feature,
+    protocol,
     allVersions: _versions,
     applicableVersions: versions,
     operations
