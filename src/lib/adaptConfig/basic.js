@@ -1,4 +1,3 @@
-
 import path from 'path'
 // import callerPath from 'caller-path'
 import { fileURLToPath } from 'url'
@@ -45,7 +44,8 @@ export default ({ servableConfig }) => {
     servableConfig.protocols = {}
   }
 
-  if (!servableConfig.protocols.local || !servableConfig.protocols.local.length) {
+  if (!servableConfig.protocols.local
+    || !servableConfig.protocols.local.length) {
     servableConfig.protocols.local = [
       path.resolve('', 'protocols')
     ]

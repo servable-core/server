@@ -37,7 +37,7 @@ export default async ({ servableConfig, engine }) => {
 
     const app = await engine.createApp({ servableConfig })
     await global.Servable.hydrate({ servableConfig, engine, app })
-    // Servable.Express.app = app
+
     // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > created an expres app`, Servable.Express.app)
 
     const staticSchema = await buildSchema({ servableConfig })
@@ -46,6 +46,7 @@ export default async ({ servableConfig, engine }) => {
     if (!isValid) {
       throw new Error(message)
     }
+
     console.info("[Servable]", "Schema is valid. Continuing.")
 
     // await mockDocumentation({ schema: staticSchema })
@@ -71,6 +72,7 @@ export default async ({ servableConfig, engine }) => {
       schema: staticSchema,
       engine
     })
+
     if (!serverStruct) {
       Servable.Console.log("[Servable]", '[DEBUG]', `Launch > failed creating the parse server`)
       return
@@ -79,7 +81,6 @@ export default async ({ servableConfig, engine }) => {
     // await mockDocumentation({ schema: _schema })
 
     // Servable.Console.log("[Servable]", `Launch > started the parse server`)
-
 
     const { schema, server, configuration } = serverStruct
     // Servable.Console.log('servableConfig', servableConfig, 'serverStruct', serverStruct,)

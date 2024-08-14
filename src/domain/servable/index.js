@@ -56,7 +56,10 @@ export default class Servable extends BaseClass {
       this.App.Route.Constants = {
         Methods: {
           GET: 'get',
-          POST: 'post'
+          POST: 'post',
+          PUT: 'put',
+          DELETE: 'delete',
+          OPTIONS: 'options',
         },
         RateLimiting: {
           Type: {
@@ -73,21 +76,5 @@ export default class Servable extends BaseClass {
     // this.AppNative = await this._engine.adaptAppNative({ servableConfig: this.servableConfig })
     this.AppNative = app
   }
-
-  toString() {
-    return super.toString()
-  }
-
-  get appClass() {
-    const { appProtocol } = this.schema
-    const {
-      jsClasses,
-      classes: { managed },
-    } = appProtocol.schema
-    const appClass = jsClasses.filter(a => a.name === 'App')
-    return appClass[0]
-  }
-
-  set appClass(value) { }
 }
 

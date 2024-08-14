@@ -5,7 +5,7 @@ import targetDockerPath from './targetDockerPath.js'
 
 export default async (props) => {
   const {
-    item: protocol,
+    protocol,
   } = props
 
   const targetPath = targetComposePath({ protocol })

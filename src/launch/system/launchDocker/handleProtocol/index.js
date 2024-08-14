@@ -15,7 +15,7 @@ export default async (props) => {
     servableConfig
   } = props
 
-  const existingDockerCompose = await existingCompose({ item: protocol })
+  const existingDockerCompose = await existingCompose({ protocol })
   if (!(await shouldStart({ item: protocol, existingDockerCompose }))) {
     return adaptForConsumption({ item: protocol, config: existingDockerCompose })
   }
