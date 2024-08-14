@@ -25,7 +25,7 @@ export default async ({ schema, servableConfig }) => {
       allProtocols: protocols,
       appProtocol
     })
-  })).filter(a => a)
+  }))
 
-  return items
+  return items.filter(a => a)
 }
