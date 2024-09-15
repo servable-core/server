@@ -24,7 +24,7 @@ export default ({ servableConfig }) => {
     }
   }
 
-  if (servableConfig.dryRun && servableConfig.dryRun.enabled) {
+  if (servableConfig.dryRun.enabled) {
     const { envs = [] } = servableConfig.dryRun
     const currentEnv = process.env.NODE_ENV
     if (!envs.includes(currentEnv)) {
@@ -32,6 +32,30 @@ export default ({ servableConfig }) => {
         enabled: false,
       }
     }
+  }
+
+  servableConfig.dryRun.matches = ({ userStruct, role }) => {
+    if (!servableConfig.dryRun.enabled) {
+      return true
+    }
+
+    if (!userStruct) {
+      return false
+    }
+
+    const { email, phoneNumber, user } = userStruct
+    const userId = userStruct.userId ? userStruct.userId : (user ? user.id : null)
+    const { exceptions } = servableConfig.dryRun
+    if (!exceptions || !exceptions.users) {
+      return false
+    }
+
+    const candidate = exceptions.users.find(a => {
+      return (a.email && email)
+        || (a.id && userId)
+        || (a.phoneNumber && phoneNumber)
+    })
+    return candidate
   }
 
   if (!servableConfig.distribution) {
