@@ -24,6 +24,16 @@ export default ({ servableConfig }) => {
     }
   }
 
+  if (servableConfig.dryRun && servableConfig.dryRun.enabled) {
+    const { envs = [] } = servableConfig.dryRun
+    const currentEnv = process.env.NODE_ENV
+    if (!envs.includes(currentEnv)) {
+      servableConfig.dryRun = {
+        enabled: false,
+      }
+    }
+  }
+
   if (!servableConfig.distribution) {
     servableConfig.distribution = {
       enabled: false,
