@@ -33,6 +33,9 @@ export default class Servable extends BaseClass {
   get Config() { return this._config }
   set Config(value) { this._config = value }
 
+  get ServableConfig() { return this._servableConfig }
+  set ServableConfig(value) { this._servableConfig = value }
+
   get engine() { return this._engine }
   set engine(value) { this._engine = value }
 
