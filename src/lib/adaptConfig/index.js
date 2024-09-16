@@ -2,8 +2,21 @@ import basic from "./basic.js"
 // import setConfigurations from "./setConfigurations/index.js"
 
 
-export default (props) => {
+export default ({
+  servableConfig,
+  payload,
+  live,
+  engine
+}) => {
   // const { servableConfig, live = false } = props
-  basic(props)
-  props.engine.setConfigurations(props)
+  basic({
+    servableConfig,
+  })
+
+  engine && engine.setConfigurations({
+    servableConfig,
+    payload,
+    live,
+    engine
+  })
 }
