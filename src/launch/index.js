@@ -27,8 +27,10 @@ export default async ({ servableConfig, engine }) => {
   // Servable.Console.log("[Servable]", '[DEBUG]', `launch > entry`,)
 
   try {
-
-    adaptConfig({ servableConfig, engine })
+    adaptConfig({
+      servableConfig,
+      engine
+    })
 
     global.Servable = new ServableClass()
 

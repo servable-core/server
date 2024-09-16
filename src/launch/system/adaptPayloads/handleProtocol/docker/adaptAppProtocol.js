@@ -21,7 +21,7 @@ export default async ({
     : ''
 
   const storageService = config.services['minio']
-  const configSERVABLE_OBJECTSTORAGE_ENDPOINT = `http://localhost:${storageService.ports[0].published}`
+  const configENGINE_OBJECTSTORAGE_ENDPOINT = `http://localhost:${storageService.ports[0].published}`
 
   const redisCacheService = config.services['redis-cache']
   const configSERVABLE_REDIS_CACHE_URI = `redis://:${redisCacheService.environment.REDIS_PASSWORD}@localhost:${redisCacheService.ports[0].published}`
@@ -32,7 +32,7 @@ export default async ({
   const payload = {
     databaseURI: envOr(process.env.SERVABLE_DATABASE_URI, configSERVABLE_DATABASE_URI),
     utilsDatabaseURI: envOr(process.env.SERVABLE_UTILS_DATABASE_URI, configSERVABLE_UTILS_DATABASE_URI),
-    filesAdapterEndPoint: envOr(process.env.SERVABLE_OBJECTSTORAGE_ENDPOINT, configSERVABLE_OBJECTSTORAGE_ENDPOINT),
+    filesAdapterEndPoint: envOr(process.env.ENGINE_OBJECTSTORAGE_ENDPOINT, configENGINE_OBJECTSTORAGE_ENDPOINT),
     redisCacheUri: envOr(process.env.SERVABLE_REDIS_CACHE_URI, configSERVABLE_REDIS_CACHE_URI),
     liveQueryServiceUri: envOr(process.env.SERVABLE_REDIS_LIVESERVER_DB_URI, configSERVABLE_REDIS_LIVESERVER_DB_URI),
   }
