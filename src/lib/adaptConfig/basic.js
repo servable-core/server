@@ -122,7 +122,7 @@ export default ({ servableConfig }) => {
 
   servableConfig.envs = servableConfig.envs ? servableConfig.envs : {}
 
-  servableConfig.envs["serverPort"] = envOr(process.env.SERVABLE_SERVER_PORT, 8000)
+  servableConfig.envs["serverPort"] = envOr(process.env.SERVABLE_SERVER_PORT, 1337)
   servableConfig.envs["serverHost"] = envOr(process.env.SERVABLE_SERVER_HOST, "http://localhost")
   servableConfig.envs["serverURL"] = `${servableConfig.envs["serverHost"]}:${servableConfig.envs["serverPort"]}`
   servableConfig.envs["appID"] = envOr(process.env.SERVABLE_APP_ID, "my-appid")
