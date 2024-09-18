@@ -3,7 +3,7 @@ import handleDistribution from './handleDistribution/index.js'
 // import memwatch from 'node-memwatch-x'
 
 export default async ({ servableConfig, app, schema, engine }) => {
-  console.log('[SERVABLE]', '[DEBUG]', 'launch>start> ff ')
+
 
   let hd = null
   let launchedServer = null

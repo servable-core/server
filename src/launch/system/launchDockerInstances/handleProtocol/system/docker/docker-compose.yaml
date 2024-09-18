@@ -1,7 +1,3 @@
-version: "3.7"
-networks:
-  app:
-    driver: bridge
 services:
   servable-redis-cache:
     image: docker.io/bitnami/redis:6.2
@@ -16,5 +12,3 @@ services:
       - ./redis-cache:/bitnami/redis/data
     x-env-overrides:
       - "SERVABLE_REDIS_CACHE_URI": 6379
-    networks:
-      - app

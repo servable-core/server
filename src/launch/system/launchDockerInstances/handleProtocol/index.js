@@ -1,6 +1,7 @@
 import * as compose from 'docker-compose'
 import YAML from 'yaml'
 import adaptServices from './adaptServices/index.js'
+import adaptServicesPorts from './adaptServicesPorts/index.js'
 import updateTargetCompose from './lib/updateTargetCompose.js'
 import targetDockerPath from './lib/targetDockerPath.js'
 import existingCompose from './lib/existingCompose.js'
@@ -8,7 +9,7 @@ import adaptForConsumption from './attachToProtocol/index.js'
 import copyDataIfNeeded from './lib/copyDataIfNeeded.js'
 import sanitizePath from 'path-sanitizer'
 import serverSystem from './system/index.js'
-
+import { sha256, } from 'js-sha256'
 export default async ({
   protocol,
   servableConfig,
@@ -38,21 +39,29 @@ export default async ({
       })
     }
 
-    if (!declaredDockerCompose
-      && executionDockerCompose) {
+    const stopExecution = async () => {
       try {
         await compose.stop({
           cwd: executionDockerComposePath,
           composeOptions: [
             ['--project-name', projectName],
+            // TODO: stop orphans['--remove-orphans']
           ],
           callback: chunk => {
             Servable.Console.log("[Servable]", `Docker compose down job in progres for ${protocol.id}: `, chunk.toString())
           }
         })
+
+        return true
       } catch (e) {
         Servable.Console.error(e)
+        return false
       }
+    }
+
+    if (!declaredDockerCompose
+      && executionDockerCompose) {
+      await stopExecution()
       return adaptForConsumption({
         protocol,
         config: executionDockerCompose
@@ -88,18 +97,6 @@ export default async ({
       services[key] = protocolServices[key]
     })
 
-
-    // const networkName = projectName
-
-    // let network
-    // let networks = config.data.config.networks
-    // if (networks && Object.keys(networks).length) {
-    //     network = networks[Object.keys(networks)[0]]
-    // }
-    // if (network) {
-    //     network = networks[0]
-    // }
-
     declaredDockerCompose.data.config.services = await adaptServices({
       services,
       protocol,
@@ -108,47 +105,53 @@ export default async ({
 
     if (!declaredDockerCompose.data.config.services
       || !Object.keys(declaredDockerCompose.data.config.services).length) {
-      try {
-        await compose.stop({
-          cwd: executionDockerComposePath,
-          composeOptions: [
-            ['--project-name', projectName],
-            // TODO: stop orphans['--remove-orphans']
-          ],
-          callback: chunk => {
-            Servable.Console.log("[Servable]", `Docker compose down job in progres for ${protocol.id}: `, chunk.toString())
-          }
-        })
-      } catch (e) {
-        Servable.Console.error(e)
-      }
+      await stopExecution()
       return adaptForConsumption({
         protocol,
         config: declaredDockerCompose.data.config
       })
     }
 
-    const configAsString = YAML.stringify(declaredDockerCompose.data.config)
-
-    await updateTargetCompose({
-      protocol,
-      data: configAsString,
-    })
-
-    await copyDataIfNeeded({
-      protocol,
-    })
-
-    await compose.upAll({
-      cwd: executionDockerComposePath,
-      composeOptions: [
-        ['--project-name', projectName],
-        // TODO: stop orphans['--remove-orphans']
-      ],
-      callback: chunk => {
-        Servable.Console.log("[Servable]", `Docker compose up job in progres for ${protocol.id}: `, chunk.toString())
+    const declaredFingerprint = sha256(YAML.stringify(declaredDockerCompose.data.config))
+    let shouldUpAll = false
+    if (executionDockerCompose) {
+      const existingFingerprint = executionDockerCompose['x-fingerprint']
+      if (declaredFingerprint
+        !== existingFingerprint) {
+        await stopExecution()
+        shouldUpAll = true
       }
-    })
+    }
+    else {
+      shouldUpAll = true
+    }
+
+    if (shouldUpAll) {
+      declaredDockerCompose.data.config.services = await adaptServicesPorts({
+        services,
+        protocol,
+        servableConfig
+      })
+      declaredDockerCompose.data.config['x-fingerprint'] = declaredFingerprint
+      await updateTargetCompose({
+        protocol,
+        data: YAML.stringify(declaredDockerCompose.data.config),
+      })
+      await copyDataIfNeeded({
+        protocol,
+      })
+
+      await compose.upAll({
+        cwd: executionDockerComposePath,
+        composeOptions: [
+          ['--project-name', projectName],
+          // TODO: stop orphans['--remove-orphans']
+        ],
+        callback: chunk => {
+          Servable.Console.log("[Servable]", `Docker compose up job in progres for ${protocol.id}: `, chunk.toString())
+        }
+      })
+    }
 
     if (declaredDockerCompose.data.config.services) {
       for (const serviceKey of Object.keys(declaredDockerCompose.data.config.services)) {

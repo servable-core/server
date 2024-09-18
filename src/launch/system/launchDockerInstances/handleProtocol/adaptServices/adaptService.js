@@ -1,5 +1,5 @@
 import updateVolumeDestination from './adaptVolume.js'
-import adaptPort from './adaptPort.js'
+// import adaptPort from './adaptPort.js'
 import adaptEnvironmentVariable from './adaptEnvironmentVariable.js'
 
 export default async ({
@@ -40,14 +40,14 @@ export default async ({
     })
   }
 
-  if (ports && ports.length) {
-    ports = await Promise.all(ports.map(async port => {
-      return adaptPort({
-        protocol,
-        port
-      })
-    }))
-  }
+  // if (ports && ports.length) {
+  //   ports = await Promise.all(ports.map(async port => {
+  //     return adaptPort({
+  //       protocol,
+  //       port
+  //     })
+  //   }))
+  // }
 
   if (environment && Object.keys(environment).length) {
     for (const variableKey of Object.keys(environment)) {
@@ -59,13 +59,12 @@ export default async ({
       })
       environment[variableKey] = value
     }
-
   }
 
   return {
     ...service,
     volumes,
-    ports,
+    // ports,
     environment
   }
 }
