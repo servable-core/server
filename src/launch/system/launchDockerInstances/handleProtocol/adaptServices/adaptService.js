@@ -1,18 +1,21 @@
 import updateVolumeDestination from './adaptVolume.js'
 import adaptPort from './adaptPort.js'
+import adaptEnvironmentVariable from './adaptEnvironmentVariable.js'
 
-export default async (props) => {
-  const {
-    item,
-    service
-  } = props
+export default async ({
+  protocol,
+  service,
+  key,
+  servableConfig
+}) => {
 
-  let { volumes, ports } = service
+  let { volumes, ports, environment } = service
   if (volumes && volumes.length) {
     volumes = volumes.map(volume => {
       return updateVolumeDestination({
-        protocol: item,
-        volume
+        protocol,
+        volume,
+        key
       })
     })
   }
@@ -20,15 +23,29 @@ export default async (props) => {
   if (ports && ports.length) {
     ports = await Promise.all(ports.map(async port => {
       return adaptPort({
-        protocol: item,
+        protocol,
         port
       })
     }))
   }
 
+  if (environment && Object.keys(environment).length) {
+    for (const variableKey of Object.keys(environment)) {
+      const value = await adaptEnvironmentVariable({
+        protocol,
+        variableKey,
+        variableValue: environment[variableKey],
+        servableConfig
+      })
+      environment[variableKey] = value
+    }
+
+  }
+
   return {
     ...service,
     volumes,
-    ports
+    ports,
+    environment
   }
 }

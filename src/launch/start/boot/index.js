@@ -1,6 +1,6 @@
 import migrate from '../migrate/index.js'
 import quit from './quit.js'
-import qualifyProduction from './payload/production/index.js'
+import qualify from './qualify.js'
 
 export default async ({
   servableConfig,
@@ -16,7 +16,7 @@ export default async ({
     shouldMigrate,
     waitBeforeQuit,
     migrations
-  } = await qualifyProduction({
+  } = await qualify({
     servableConfig,
     app,
     schema,

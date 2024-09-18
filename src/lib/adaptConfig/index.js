@@ -1,10 +1,7 @@
 import basic from "./basic.js"
-// import setConfigurations from "./setConfigurations/index.js"
-
 
 export default ({
   servableConfig,
-  payload,
   live,
   engine
 }) => {
@@ -15,7 +12,6 @@ export default ({
 
   engine && engine.setConfigurations({
     servableConfig,
-    payload,
     live,
     engine
   })

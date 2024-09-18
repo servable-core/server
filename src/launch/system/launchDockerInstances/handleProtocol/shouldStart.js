@@ -1,9 +1,10 @@
-import targetComposePath from './utils/targetDockerComposePath.js'
+import targetComposePath from './lib/targetDockerComposePath.js'
 import checkFileExists from '../../../utils/checkFileExists.js'
 
 export default async ({
-  item: protocol,
-  existingDockerCompose
+  protocol,
+  executionDockerCompose,
+  executionDockerComposePath
 }) => {
 
   //#TODO: protocol.loader

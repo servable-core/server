@@ -3,10 +3,9 @@ import checkFileExists from '../../../../utils/checkFileExists.js'
 import * as compose from 'docker-compose'
 import targetDockerPath from './targetDockerPath.js'
 
-export default async (props) => {
-  const {
-    protocol,
-  } = props
+export default async ({
+  protocol,
+}) => {
 
   const targetPath = targetComposePath({ protocol })
   if (!(await checkFileExists(targetPath))) {

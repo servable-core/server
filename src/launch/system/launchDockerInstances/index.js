@@ -1,11 +1,10 @@
 import handleProtocol from "./handleProtocol/index.js"
 import canStart from "./canStart.js"
 
-export default async ({ schema, servableConfig }) => {
+export default async ({ schema, servableConfig, engine }) => {
 
   const {
     protocols,
-    appProtocol,
   } = schema
 
   if (!servableConfig.system.docker.environments.includes(process.env.NODE_ENV)) {
@@ -17,15 +16,17 @@ export default async ({ schema, servableConfig }) => {
     return
   }
 
-  const items = await Promise.all(protocols.map(async item => {
-    return handleProtocol({
-      schema,
+  const items = []
+
+  for (const protocol of protocols) {
+    const item = await handleProtocol({
       servableConfig,
-      item,
-      allProtocols: protocols,
-      appProtocol
+      protocol,
+      engine
+
     })
-  }))
+    items.push(item)
+  }
 
   return items.filter(a => a)
 }

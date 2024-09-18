@@ -1,18 +1,24 @@
 import adaptDocker from './docker/index.js'
 
-export default async (props) => {
-  const {
-    item,
-    servableConfig
-  } = props
+export default async ({
+  protocol,
+  servableConfig,
+  schema,
+  engine
+}) => {
 
-  const { system } = item
+  const { system } = protocol
   if (!system) {
     return
   }
 
   const { docker } = system
   if (docker) {
-    await adaptDocker(props)
+    await adaptDocker({
+      protocol,
+      schema,
+      servableConfig,
+      engine
+    })
   }
 }

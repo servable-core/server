@@ -2,9 +2,9 @@ import path from 'path'
 // import callerPath from 'caller-path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import envOr from '../utils/envOr.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-
 
 export default ({ servableConfig }) => {
   if (servableConfig.adaptedBasic) {
@@ -68,7 +68,6 @@ export default ({ servableConfig }) => {
     servableConfig.distribution.databaseURI = process.env.SERVABLE_UTILS_DATABASE_URI
   }
 
-
   if (!servableConfig.system) {
     servableConfig.system = {}
   }
@@ -120,6 +119,18 @@ export default ({ servableConfig }) => {
       type: 'app',
     }
   }
+
+  servableConfig.envs = servableConfig.envs ? servableConfig.envs : {}
+
+  servableConfig.envs["serverPort"] = envOr(process.env.SERVABLE_SERVER_PORT, 8000)
+  servableConfig.envs["serverHost"] = envOr(process.env.SERVABLE_SERVER_HOST, "http://localhost")
+  servableConfig.envs["serverURL"] = `${servableConfig.envs["serverHost"]}:${servableConfig.envs["serverPort"]}`
+  servableConfig.envs["appID"] = envOr(process.env.SERVABLE_APP_ID, "my-appid")
+  servableConfig.envs["appName"] = envOr(process.env.SERVABLE_APP_NAME, "My app")
+  servableConfig.envs["masterKey"] = envOr(process.env.SERVABLE_MASTER_KEY, "MASTER_KEY_TO_CHANGE")
+  servableConfig.envs["verbose"] = envOr(process.env.SERVABLE_VERBOSE, 1)
+  servableConfig.envs["logLevel"] = envOr(process.env.SERVABLE_LOG_LEVEL, "verbose")
+  // servableConfig.envs["utilsDatabaseURI"] = envOr(process.env.SERVABLE_UTILS_DATABASE_URI, undefined)
 
   servableConfig.adaptedBasic = true
 }

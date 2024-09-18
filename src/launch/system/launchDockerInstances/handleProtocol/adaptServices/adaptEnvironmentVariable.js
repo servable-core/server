@@ -1,11 +1,23 @@
 import path from 'path'
+import ejs from 'ejs'
 
-export default (props) => {
+
+export default async (props) => {
   const {
-    volume,
+    variableKey,
+    variableValue,
     protocol,
-    key
+    servableConfig
   } = props
+  if (!variableValue) {
+    return variableValue
+  }
+
+  return ejs.render(variableValue, servableConfig.envs, {
+    async: true,
+    strict: false
+  })
+
 
   const { source, type } = volume
   // return volume

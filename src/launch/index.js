@@ -52,16 +52,23 @@ export default async ({ servableConfig, engine }) => {
     console.info("[Servable]", "Schema is valid. Continuing.")
 
     // await mockDocumentation({ schema: staticSchema })
-    await launchSystem({
+    const systemPayload = await launchSystem({
       schema: staticSchema,
       servableConfig,
+      engine
+    })
+
+    adaptConfig({
+      servableConfig,
+      payload: systemPayload,
+      live: true,
       engine
     })
 
     // Servable.Console.log("[Servable]", '[DEBUG]', `servableConfig`, servableConfig)
 
 
-    const httpServer = await engine.createHttpServer({ app })
+    const httpServer = await engine.createHttpServer({ app, servableConfig })
     Servable.httpServer = httpServer
     // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > created a http server`)
 

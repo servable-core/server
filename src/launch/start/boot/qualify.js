@@ -1,63 +1,24 @@
-import stateForConfiguration from '../../../../../lib/utilsDatabase/classes/parseServerState/functions/stateForConfiguration.js'
-import _ from 'underscore'
-import _migrations from '../../migrations.js'
+import stateForConfiguration from '../../../lib/utilsDatabase/classes/parseServerState/functions/stateForConfiguration.js'
+import _migrations from './migrations.js'
 
 const MAX_ATTEMPTS = 5
 const MAX_DURATION = 10 //in second
 
-import MigrationStateEnum from '../../../../../lib/utilsDatabase/classes/parseServerState/enums/migrationState.js'
+import MigrationStateEnum from '../../../lib/utilsDatabase/classes/parseServerState/enums/migrationState.js'
 
 
 export default async (props) => {
   const {
-    servableConfig: { configurations },
+    servableConfig: { configuration },
     schema,
-    stagingStateItem } = props
+  } = props
 
-  let configuration = _.findWhere(configurations, { key: 'production' })
   if (!configuration) {
     return {}
   }
 
   const productionStateItem = await stateForConfiguration({ configuration })
   const migrations = await _migrations({ schema, stateItem: productionStateItem })
-
-  // if (stagingStateItem) {
-  //   switch (stagingStateItem.validationState) {
-  //     case ValidationStateEnum.Validated: {
-  //       return {
-  //         stateItem: productionStateItem,
-  //         configuration,
-  //         migrations,
-  //         shouldMigrate: true,
-  //       }
-  //     }
-  //     case ValidationStateEnum.Invalidated: {
-  //       return {
-  //         stateItem: productionStateItem,
-  //         configuration,
-  //         migrations,
-  //       }
-  //     }
-  //     case ValidationStateEnum.Initial:
-  //     default:
-  //       {
-  //         switch (stagingStateItem.migrationState) {
-  //           case MigrationStateEnum.Loading:
-  //           case MigrationStateEnum.LoadedSuccessfully:
-  //           case MigrationStateEnum.ErrorLoading: {
-  //             return {
-  //               stateItem: productionStateItem,
-  //               configuration,
-  //             }
-  //           }
-  //           default:
-  //             break
-  //         }
-  //       }
-  //       break
-  //   }
-  // }
 
   switch (productionStateItem.migrationState) {
     case MigrationStateEnum.Initial: {

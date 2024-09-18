@@ -1,9 +1,12 @@
 
-export default async (props) => {
-    const { schema, servableConfig, config, item, } = props
-
-    item.system = {
-        ...(item.system ? item.system : {}),
-        docker: config
-    }
+export default async ({
+  schema,
+  servableConfig,
+  config,
+  protocol,
+}) => {
+  protocol.system = {
+    ...(protocol.system ? protocol.system : {}),
+    docker: config
+  }
 }

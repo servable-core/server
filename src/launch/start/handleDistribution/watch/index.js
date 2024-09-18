@@ -1,7 +1,5 @@
 import parseServerStateWatcher from "../../../../utils/utilsDatabase/classes/parseServerState/functions/watch.js"
-import staging from "./configurations/staging/index.js"
-import production from "./configurations/production/index.js"
-
+import doWatch from "./doWatch.js"
 
 export default async (props) => {
   const { configuration: { key } } = props
@@ -14,16 +12,7 @@ export default async (props) => {
       if (item.key !== key) {
         return
       }
-
-      switch (item.key) {
-        case 'staging': {
-          return staging({ ...props, item, data })
-        }
-        case 'production':
-        default: {
-          return production({ ...props, item, data })
-        }
-      }
+      return doWatch({ ...props, item, data })
     }
   })
 }

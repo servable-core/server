@@ -1,5 +1,4 @@
-import staging from "./configuration/staging/index.js"
-import production from "./configuration/production/index.js"
+import doMigrate from "./doMigrate.js"
 import didMigrateSuccessfully from "../launchers/auxiliary/didMigrateSuccessfully/index.js"
 import willMigrate from '../launchers/auxiliary/willMigrate/index.js'
 import didNotMigrateError from '../launchers/auxiliary/didNotMigrateError/index.js'
@@ -35,15 +34,7 @@ export default async (props) => {
         schema,
       })
 
-      switch (configuration.key) {
-        case 'staging': {
-          result = await staging(props)
-        } break
-        case 'production':
-        default: {
-          result = await production(props)
-        } break
-      }
+      result = await doMigrate(props)
     }
 
     let _schema = result.schema ? result.schema : schema

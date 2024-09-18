@@ -1,16 +1,22 @@
 import adaptService from './adaptService.js'
 
-export default async (props) => {
-  const {
-    item,
-    services
-  } = props
+export default async ({
+  protocol,
+  services,
+  servableConfig
+}) => {
 
   // Object.keys(services).forEach(key => {
   //     let service = services[key]
   const keys = Object.keys(services)
   await Promise.all(keys.map(async key => {
-    services[key] = await adaptService({ item, service: services[key] })
+    services[key] = await adaptService({
+      protocol,
+      service: services[key],
+      key,
+      servableConfig
+    })
   }))
+
   return services
 }

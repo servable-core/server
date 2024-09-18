@@ -1,36 +1,111 @@
 import * as compose from 'docker-compose'
 import YAML from 'yaml'
 import adaptServices from './adaptServices/index.js'
-import shouldStart from './shouldStart.js'
-import updateTargetCompose from './utils/updateTargetCompose.js'
-import targetDockerPath from './utils/targetDockerPath.js'
-import existingCompose from './utils/existingCompose.js'
+import updateTargetCompose from './lib/updateTargetCompose.js'
+import targetDockerPath from './lib/targetDockerPath.js'
+import existingCompose from './lib/existingCompose.js'
 import adaptForConsumption from './attachToProtocol/index.js'
-import copyDataIfNeeded from './utils/copyDataIfNeeded.js'
+import copyDataIfNeeded from './lib/copyDataIfNeeded.js'
 import sanitizePath from 'path-sanitizer'
+import serverSystem from './system/index.js'
+import { sha256 } from 'js-sha256'
 
-export default async (props) => {
-  const {
-    item: protocol,
-    servableConfig
-  } = props
-
-  const existingDockerCompose = await existingCompose({ protocol })
-  if (!(await shouldStart({ item: protocol, existingDockerCompose }))) {
-    return adaptForConsumption({ item: protocol, config: existingDockerCompose })
-  }
-
-  //#TODO: protocol.loader
-  const _path = protocol.loader.systemDockerComposeDirPath()
-
+export default async ({
+  protocol,
+  servableConfig,
+  engine
+}) => {
   try {
-    const config = await compose.config({
-      cwd: _path,
+    const projectName = sanitizePath(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-')
+    const executionDockerComposePath = targetDockerPath({
+      protocol
+    })
+    const executionDockerCompose = await existingCompose({ protocol })
+    const declaredDockerComposeExists = await protocol.loader.systemDockerComposeExists()
+    const declaredDockerComposeDirPath = protocol.loader.systemDockerComposeDirPath()
+    let declaredDockerCompose = null
+
+    if (declaredDockerComposeExists) {
+      declaredDockerCompose = await compose.config({
+        cwd: declaredDockerComposeDirPath,
+      })
+    }
+
+    if (!declaredDockerCompose && !executionDockerCompose) {
+      return adaptForConsumption({
+        protocol,
+        config: executionDockerCompose
+      })
+    }
+
+    if (!declaredDockerCompose && executionDockerCompose) {
+      try {
+        await compose.stop({
+          cwd: executionDockerComposePath,
+          composeOptions: [
+            ['--project-name', projectName],
+            // ['--remove-orphans']
+          ],
+          callback: chunk => {
+            console.log("[Servable]", `Docker compose down job in progres for ${protocol.id}: `, chunk.toString())
+          }
+        })
+      } catch (e) {
+        console.error(e)
+      }
+      return adaptForConsumption({
+        protocol,
+        config: executionDockerCompose
+      })
+    }
+
+    // if (!(await shouldStart({
+    //   protocol,
+    //   executionDockerCompose,
+    //   executionDockerComposePath
+    // }))) {
+    //   return adaptForConsumption({
+    //     protocol,
+    //     config: executionDockerCompose
+    //   })
+    // }
+
+    let services = {}
+    if (protocol.id === 'app') {
+      const serverDocker = await compose.config({
+        cwd: serverSystem.docker.path()
+      })
+      if (serverDocker) {
+        services = serverDocker.data.config.services
+        await serverSystem.docker.amendServices({
+          services,
+          servableConfig
+        })
+      }
+
+      const engineDocker = await compose.config({
+        cwd: engine.system.docker.path()
+      })
+      if (engineDocker) {
+        Object.keys(engineDocker.data.config.services).forEach(key => {
+          services[key] = engineDocker.data.config.services[key]
+        })
+        await engine.system.docker.amendServices({
+          services,
+          servableConfig
+        })
+      }
+    }
+
+    let protocolServices = declaredDockerCompose.data.config.services
+      ? declaredDockerCompose.data.config.services
+      : {}
+
+    Object.keys(protocolServices).forEach(key => {
+      services[key] = protocolServices[key]
     })
 
-    let services = config.data.config.services
 
-    const projectName = sanitizePath(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-')
     // const networkName = projectName
 
     // let network
@@ -42,18 +117,48 @@ export default async (props) => {
     //     network = networks[0]
     // }
 
-    config.data.config.services = await adaptServices({ services, item: protocol })
-    if (!config.data.config.services || !Object.keys(config.data.config.services).length) {
-      return adaptForConsumption({ item: protocol, config: config.data.config })
+    declaredDockerCompose.data.config.services = await adaptServices({
+      services,
+      protocol,
+      servableConfig
+    })
+
+    if (!declaredDockerCompose.data.config.services
+      || !Object.keys(declaredDockerCompose.data.config.services).length) {
+      try {
+        await compose.down({
+          cwd: executionDockerComposePath,
+          composeOptions: [
+            ['--project-name', projectName],
+            // ['--remove-orphans']
+          ],
+          callback: chunk => {
+            console.log("[Servable]", `Docker compose down job in progres for ${protocol.id}: `, chunk.toString())
+          }
+        })
+      } catch (e) {
+        console.error(e)
+      }
+      return adaptForConsumption({
+        protocol,
+        config: declaredDockerCompose.data.config
+      })
     }
 
-    const configAsString = YAML.stringify(config.data.config)
-    await updateTargetCompose({ item: protocol, data: configAsString })
-    await copyDataIfNeeded({ item: protocol, })
-    const targetPath = targetDockerPath({ protocol: protocol })
+    const configAsString = YAML.stringify(declaredDockerCompose.data.config)
+    const sha = sha256(configAsString)
+
+    await updateTargetCompose({
+      protocol,
+      data: configAsString,
+      sha
+    })
+    await copyDataIfNeeded({
+      protocol,
+    })
 
     await compose.upAll({
-      cwd: targetPath,
+      cwd: executionDockerComposePath,
       composeOptions: [
         ['--project-name', projectName],
         // ['--remove-orphans']
@@ -63,11 +168,12 @@ export default async (props) => {
       }
     })
 
-    return adaptForConsumption({ item: protocol, config: config.data.config })
+    return adaptForConsumption({
+      protocol,
+      config: declaredDockerCompose.data.config
+    })
   } catch (e) {
     console.error(e)
     throw (e)
   }
-
-  return null
 }

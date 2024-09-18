@@ -3,14 +3,11 @@ import checkFileExists from '../../../../utils/checkFileExists.js'
 import copyDir from '../../../../utils/copyDir.js'
 import targetDockerPath from "./targetDockerPath.js"
 
-export default async (props) => {
-  const {
-    item: protocol,
-    data
-  } = props
-
-
-  let dataPath = protocol.loader.systemDockerDataPath()
+export default async ({
+  protocol,
+  data
+}) => {
+  const dataPath = protocol.loader.systemDockerDataPath()
   if (!(await checkFileExists(dataPath))) {
     return
   }

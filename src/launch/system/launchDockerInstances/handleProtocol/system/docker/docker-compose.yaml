@@ -1,0 +1,18 @@
+version: "3.7"
+networks:
+  app:
+    driver: bridge
+services:
+  servable-redis-cache:
+    image: docker.io/bitnami/redis:6.2
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for app.
+      ALLOW_EMPTY_PASSWORD: yes
+      # REDIS_PASSWORD : REDIS_PWD_TO_CHANGE
+      REDIS_DISABLE_COMMANDS : FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis-cache:/bitnami/redis/data
+    networks:
+      - app

@@ -1,10 +1,11 @@
-import adaptAppProtocol from "./adaptAppProtocol.js"
 import adaptGenericProtocol from "./adaptGenericProtocol.js"
+import serverSystem from '../../../launchDockerInstances/handleProtocol/system/index.js'
 
 export default async ({
   schema,
   servableConfig,
-  item: protocol
+  protocol,
+  engine
 }) => {
 
   let payload
@@ -20,7 +21,12 @@ export default async ({
     payload = await adaptPayload(adaptPayloadProps)
   }
   else if (protocol.id === 'app') {
-    payload = await adaptAppProtocol(adaptPayloadProps)
+    const enginePayload = await engine.system.adaptAppPayload(adaptPayloadProps)
+    const serverSystemPayload = await serverSystem.adaptAppPayload(adaptPayloadProps)
+    payload = {
+      ...serverSystemPayload,
+      ...enginePayload,
+    }
   }
   else {
     payload = await adaptGenericProtocol(adaptPayloadProps)

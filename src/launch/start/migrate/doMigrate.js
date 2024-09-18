@@ -1,4 +1,4 @@
-import perform from '../../perform/index.js'
+import perform from './perform/index.js'
 
 export default async (props) => {
   const {

@@ -1,18 +1,20 @@
 import handleProtocol from "./handleProtocol/index.js"
 
-export default async (props) => {
-  const { schema, servableConfig } = props
+export default async ({
+  schema,
+  servableConfig,
+  engine
+}) => {
   const {
     protocols,
-    appProtocol,
   } = schema
 
-  const items = await Promise.all(protocols.map(async item => {
+  const items = await Promise.all(protocols.map(async protocol => {
     return handleProtocol({
-      ...props,
-      item,
-      allProtocols: protocols,
-      appProtocol
+      schema,
+      protocol,
+      servableConfig,
+      engine
     })
   }))
 }
