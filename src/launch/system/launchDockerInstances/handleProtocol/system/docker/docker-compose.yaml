@@ -14,5 +14,7 @@ services:
       - 6379:6379
     volumes:
       - ./redis-cache:/bitnami/redis/data
+    x-env-overrides:
+      - "SERVABLE_REDIS_CACHE_URI": 6379
     networks:
       - app

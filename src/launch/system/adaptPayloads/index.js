@@ -9,7 +9,7 @@ export default async ({
     protocols,
   } = schema
 
-  const items = await Promise.all(protocols.map(async protocol => {
+  await Promise.all(protocols.map(async protocol => {
     return handleProtocol({
       schema,
       protocol,

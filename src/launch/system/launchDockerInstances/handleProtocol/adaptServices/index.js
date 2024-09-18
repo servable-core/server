@@ -8,14 +8,22 @@ export default async ({
 
   // Object.keys(services).forEach(key => {
   //     let service = services[key]
+  if (!services) {
+    return services
+  }
   const keys = Object.keys(services)
   await Promise.all(keys.map(async key => {
-    services[key] = await adaptService({
+    const result = await adaptService({
       protocol,
       service: services[key],
       key,
       servableConfig
     })
+    if (result) {
+      services[key] = result
+    } else {
+      delete services[key]
+    }
   }))
 
   return services

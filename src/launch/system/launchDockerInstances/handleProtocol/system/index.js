@@ -9,17 +9,9 @@ export default {
     path: () => {
       return `${__dirname}/docker`
     },
-    amendServices: async ({
-      services,
-      servableConfig,
-    }) => {
-      if (process.env.SERVABLE_REDIS_CACHE_URI) {
-        delete services["servable-redis-cache"]
-      }
-    }
   },
   adaptAppPayload: async ({
-    item,
+    protocol,
     config,
     servableConfig,
     schema }) => {

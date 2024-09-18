@@ -11,16 +11,12 @@ export default async ({
   let payload
   const adaptPayloadProps = {
     config: protocol.system.docker,
-    item: protocol,
+    protocol,
     servableConfig,
     schema
   }
 
-  const adaptPayload = await protocol.loader.systemDockerPayloadAdapter()
-  if (adaptPayload) {
-    payload = await adaptPayload(adaptPayloadProps)
-  }
-  else if (protocol.id === 'app') {
+  if (protocol.id === 'app') {
     const enginePayload = await engine.system.adaptAppPayload(adaptPayloadProps)
     const serverSystemPayload = await serverSystem.adaptAppPayload(adaptPayloadProps)
     payload = {
@@ -30,6 +26,11 @@ export default async ({
   }
   else {
     payload = await adaptGenericProtocol(adaptPayloadProps)
+  }
+
+  const adaptPayload = await protocol.loader.systemDockerPayloadAdapter()
+  if (adaptPayload) {
+    payload = await adaptPayload({ ...adaptPayloadProps, payload })
   }
 
   protocol.system = {

@@ -9,6 +9,26 @@ export default async ({
   servableConfig
 }) => {
 
+
+  const customEnvs = service['x-env-overrides']
+  if (customEnvs && customEnvs.length) {
+    const ports = service.ports
+    if (ports && ports.length) {
+      let count = ports.length
+      for (const customEnv of customEnvs) {
+        const key = Object.keys(customEnv)[0]
+        const processEnvExists = process.env[key] !== undefined
+        if (processEnvExists) {
+          count--
+        }
+      }
+
+      if (count === 0) {
+        return null
+      }
+    }
+  }
+
   let { volumes, ports, environment } = service
   if (volumes && volumes.length) {
     volumes = volumes.map(volume => {

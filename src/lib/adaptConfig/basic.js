@@ -130,7 +130,8 @@ export default ({ servableConfig }) => {
   servableConfig.envs["masterKey"] = envOr(process.env.SERVABLE_MASTER_KEY, "MASTER_KEY_TO_CHANGE")
   servableConfig.envs["verbose"] = envOr(process.env.SERVABLE_VERBOSE, 1)
   servableConfig.envs["logLevel"] = envOr(process.env.SERVABLE_LOG_LEVEL, "verbose")
-  // servableConfig.envs["utilsDatabaseURI"] = envOr(process.env.SERVABLE_UTILS_DATABASE_URI, undefined)
+  servableConfig.envs["redisCacheUri"] = process.env.SERVABLE_REDIS_CACHE_URI
+  servableConfig.envs["utilsDatabaseURI"] = process.env.SERVABLE_UTILS_DATABASE_URI
 
   servableConfig.adaptedBasic = true
 }

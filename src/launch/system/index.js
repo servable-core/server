@@ -1,12 +1,12 @@
 import adaptSystemPayloads from "./adaptPayloads/index.js"
-import launchDockerInstances from "./launchDockerInstances/index.js"
+import launchDockerInstancesIfEnabled from "./launchDockerInstances/index.js"
 
 export default async ({
   schema,
   servableConfig,
   engine
 }) => {
-  const dockerSystems = await launchDockerInstances({
+  await launchDockerInstancesIfEnabled({
     schema,
     servableConfig,
     engine

@@ -7,18 +7,20 @@ export default async ({
   engine
 }) => {
 
+  if (!protocol.system) {
+    protocol.system = {}
+  }
+
   const { system } = protocol
-  if (!system) {
+  const { docker } = system
+  if (!docker) {
     return
   }
 
-  const { docker } = system
-  if (docker) {
-    await adaptDocker({
-      protocol,
-      schema,
-      servableConfig,
-      engine
-    })
-  }
+  await adaptDocker({
+    protocol,
+    schema,
+    servableConfig,
+    engine
+  })
 }
