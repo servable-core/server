@@ -10,7 +10,7 @@ export default async ({
 }) => {
 
 
-  const customEnvs = service['x-env-overrides']
+  const customEnvs = service['x-servable-envs']
   if (customEnvs && customEnvs.length) {
     const ports = service.ports
     if (ports && ports.length) {

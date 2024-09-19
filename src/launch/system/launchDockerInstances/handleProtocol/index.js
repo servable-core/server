@@ -75,6 +75,17 @@ export default async ({
       })
     }
 
+    if (declaredDockerCompose
+      && declaredDockerCompose.data.config['x-servable-disabled']) {
+      await stopExecution()
+      return adaptForConsumption({
+        protocol,
+        config: executionDockerCompose
+      })
+    }
+
+
+
     let services = {}
     if (protocol.id === 'app') {
       const serverDocker = await compose.config({
@@ -122,7 +133,7 @@ export default async ({
     const declaredFingerprint = sha256(YAML.stringify(declaredDockerCompose.data.config))
     let shouldUpAll = false
     if (executionDockerCompose) {
-      const existingFingerprint = executionDockerCompose['x-fingerprint']
+      const existingFingerprint = executionDockerCompose['x-servable-fingerprint']
       if (declaredFingerprint
         !== existingFingerprint) {
         await stopExecution()
@@ -140,7 +151,7 @@ export default async ({
         protocol,
         servableConfig
       })
-      declaredDockerCompose.data.config['x-fingerprint'] = declaredFingerprint
+      declaredDockerCompose.data.config['x-servable-fingerprint'] = declaredFingerprint
       await updateTargetCompose({
         protocol,
         data: YAML.stringify(declaredDockerCompose.data.config),
@@ -169,7 +180,7 @@ export default async ({
           continue
         }
 
-        const customEnvs = service['x-env-overrides']
+        const customEnvs = service['x-servable-envs']
         if (!customEnvs || !customEnvs.length) {
           continue
         }
