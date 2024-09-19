@@ -1,5 +1,5 @@
 import adaptGenericProtocol from "./adaptGenericProtocol.js"
-import serverSystem from '../../../launchDockerInstances/handleProtocol/system/index.js'
+import serverSystem from '../../../launchDockerInstances/handleProtocol/system/server/index.js'
 
 export default async ({
   schema,

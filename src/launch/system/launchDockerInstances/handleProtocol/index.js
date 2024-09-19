@@ -8,7 +8,8 @@ import existingCompose from './lib/existingCompose.js'
 import adaptForConsumption from './attachToProtocol/index.js'
 import copyDataIfNeeded from './lib/copyDataIfNeeded.js'
 import sanitizePath from 'path-sanitizer'
-import serverSystem from './system/index.js'
+import serverSystem from './system/server/index.js'
+import appDefaultSystem from './system/app/index.js'
 import { sha256, } from 'js-sha256'
 export default async ({
   protocol,
@@ -21,9 +22,15 @@ export default async ({
       protocol
     })
     const executionDockerCompose = await existingCompose({ protocol })
-    const declaredDockerComposeExists = await protocol.loader.systemDockerComposeExists()
-    const declaredDockerComposeDirPath = protocol.loader.systemDockerComposeDirPath()
+    let declaredDockerComposeExists = await protocol.loader.systemDockerComposeExists()
+    let declaredDockerComposeDirPath = protocol.loader.systemDockerComposeDirPath()
     let declaredDockerCompose = null
+
+    if (!declaredDockerComposeExists
+      && (protocol.id === 'app')) {
+      declaredDockerComposeDirPath = appDefaultSystem.docker.path()
+      declaredDockerComposeExists = true
+    }
 
     if (declaredDockerComposeExists) {
       declaredDockerCompose = await compose.config({
@@ -127,6 +134,7 @@ export default async ({
     }
 
     if (shouldUpAll) {
+      declaredDockerCompose.data.config.version = "3.7"
       declaredDockerCompose.data.config.services = await adaptServicesPorts({
         services,
         protocol,
