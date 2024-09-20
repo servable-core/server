@@ -12,8 +12,12 @@ export default async (props) => {
   if (!variableValue) {
     return variableValue
   }
+  const data = {
+    ...process.env,
+    ...servableConfig.envs
+  }
 
-  return ejs.render(variableValue, servableConfig.envs, {
+  return ejs.render(variableValue, data, {
     async: true,
     strict: false
   })
