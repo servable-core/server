@@ -1,12 +1,15 @@
 import adaptPort from './adaptPort.js'
 
+
 export default async ({
   protocol,
   service,
   key,
-  servableConfig
+  servableConfig,
+  allPorts,
+  serviceName
 }) => {
-  let { ports } = service
+  let { ports, environment } = service
 
   if (ports && ports.length) {
     ports = await Promise.all(ports.map(async port => {
@@ -16,6 +19,18 @@ export default async ({
       })
     }))
   }
+
+  for (const port of ports) {
+    allPorts.push({
+      ...port,
+      serviceName
+    })
+  }
+
+  ports = ports.map(p => {
+    delete p.requestedPublished
+    return p
+  })
 
   return {
     ...service,

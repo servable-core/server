@@ -16,7 +16,8 @@ export default async (props) => {
     })
     return {
       ...port,
-      published: _published
+      published: _published,
+      requestedPublished: publishedInt
     }
   } catch (e) {
     console.error(e)
