@@ -3,7 +3,8 @@ import adaptService from './adaptService.js'
 export default async ({
   protocol,
   services,
-  servableConfig
+  servableConfig,
+  networkName
 }) => {
 
   // Object.keys(services).forEach(key => {
@@ -13,11 +14,18 @@ export default async ({
   }
   const keys = Object.keys(services)
   await Promise.all(keys.map(async key => {
+    const service = services[key]
+    if (service['x-servable-disabled']) {
+      delete services[key]
+      return
+    }
+
     const result = await adaptService({
       protocol,
       service: services[key],
       key,
-      servableConfig
+      servableConfig,
+      networkName
     })
     if (result) {
       services[key] = result

@@ -11,13 +11,16 @@ import sanitizePath from 'path-sanitizer'
 import serverSystem from './system/server/index.js'
 import appDefaultSystem from './system/app/index.js'
 import { sha256, } from 'js-sha256'
+
+
+
 export default async ({
   protocol,
   servableConfig,
   engine
 }) => {
   try {
-    const projectName = sanitizePath(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-')
+    const projectName = sanitizePath(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
     const executionDockerComposePath = targetDockerPath({
       protocol
     })
@@ -37,6 +40,17 @@ export default async ({
         cwd: declaredDockerComposeDirPath,
       })
     }
+
+    if (declaredDockerCompose
+      && (protocol.id === 'app')
+      && declaredDockerCompose.data.config['x-servable-disabled']
+    ) {
+      declaredDockerComposeDirPath = appDefaultSystem.docker.path()
+      declaredDockerCompose = await compose.config({
+        cwd: declaredDockerComposeDirPath,
+      })
+    }
+
 
     if (!declaredDockerCompose
       && !executionDockerCompose) {
@@ -115,10 +129,14 @@ export default async ({
       services[key] = protocolServices[key]
     })
 
+    declaredDockerCompose.data.config.version = '3.8'
+    declaredDockerCompose.data.config.name = projectName
+    declaredDockerCompose.data.config.networks = { [projectName]: { driver: 'bridge' } }
     declaredDockerCompose.data.config.services = await adaptServices({
       services,
       protocol,
-      servableConfig
+      servableConfig,
+      networkName: projectName
     })
 
     if (!declaredDockerCompose.data.config.services
@@ -145,7 +163,7 @@ export default async ({
     }
 
     if (shouldUpAll) {
-      declaredDockerCompose.data.config.version = "3.7"
+      // declaredDockerCompose.data.config.version = "3.7"
       declaredDockerCompose.data.config.services = await adaptServicesPorts({
         services,
         protocol,

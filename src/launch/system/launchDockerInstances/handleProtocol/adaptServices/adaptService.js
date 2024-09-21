@@ -6,7 +6,8 @@ export default async ({
   protocol,
   service,
   key,
-  servableConfig
+  servableConfig,
+  networkName
 }) => {
 
 
@@ -29,7 +30,7 @@ export default async ({
     }
   }
 
-  let { volumes, ports, environment } = service
+  let { volumes, ports, environment, networks } = service
   if (volumes && volumes.length) {
     volumes = volumes.map(volume => {
       return updateVolumeDestination({
@@ -65,6 +66,7 @@ export default async ({
     ...service,
     volumes,
     // ports,
-    environment
+    environment,
+    networks: [networkName]
   }
 }
