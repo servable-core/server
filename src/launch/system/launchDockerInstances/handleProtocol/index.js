@@ -51,7 +51,6 @@ export default async ({
       })
     }
 
-
     if (!declaredDockerCompose
       && !executionDockerCompose) {
       return adaptForConsumption({

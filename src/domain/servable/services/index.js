@@ -22,7 +22,7 @@ export default class Intercom {
       protocol //#TODO: don't retain protocol
     }
     this.items.push(_service)
-    await _service.register({ protocol })
+    _service.register && await _service.register({ protocol })
   }
 
 

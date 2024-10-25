@@ -1,5 +1,7 @@
 import updateVolumeDestination from './adaptVolume.js'
 import adaptEnvironmentVariable from './adaptEnvironmentVariable.js'
+// import adaptCommand from './adaptCommand.js'
+import _ from 'underscore'
 
 export default async ({
   protocol,
@@ -27,7 +29,7 @@ export default async ({
     }
   }
 
-  let { volumes, environment } = service
+  let { volumes, environment, command } = service
   if (volumes && volumes.length) {
     volumes = volumes.map(volume => {
       return updateVolumeDestination({
@@ -50,10 +52,28 @@ export default async ({
     }
   }
 
+  // if (command) {
+  //   const commandArray = _.isArray(command)
+  //     ? command
+  //     : [command]
+
+  //   command = []
+  //   for (const _command of commandArray) {
+  //     const value = await adaptCommand({
+  //       protocol,
+  //       value: _command,
+  //       servableConfig
+  //     })
+
+  //     command.push(value)
+  //   }
+  // }
+
   return {
     ...service,
     volumes,
     environment,
+    // command,
     networks: [networkName]
   }
 }
