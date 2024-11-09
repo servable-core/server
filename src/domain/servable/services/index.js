@@ -33,7 +33,7 @@ export default class Intercom {
   }) {
     const service = _.findWhere(this.items, { id, version })
     if (!service) {
-      return new Error("Could not find designated service.")
+      return new Error(`Could not find designated service: ${id}, version: ${version}`)
     }
 
     //#TODO: don't retain protocol

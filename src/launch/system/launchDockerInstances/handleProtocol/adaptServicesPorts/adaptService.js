@@ -9,9 +9,9 @@ export default async ({
   allPorts,
   serviceName
 }) => {
-  let { ports, environment } = service
+  let { ports = [], environment } = service
 
-  if (ports && ports.length) {
+  if (ports.length) {
     ports = await Promise.all(ports.map(async port => {
       return adaptPort({
         protocol,
