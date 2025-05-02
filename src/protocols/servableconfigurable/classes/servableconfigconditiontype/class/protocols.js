@@ -1,7 +1,6 @@
 export default [
-    'disposableorphansable',
-    'disposablechildrenable',
-    'publishable',
-    'reviewable',
-    'manualable'
+  'disposableorphansable',
+  'disposablechildrenable',
+  'reviewable',
+  'manualable'
 ]

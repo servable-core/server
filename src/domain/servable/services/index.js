@@ -25,7 +25,6 @@ export default class Intercom {
     _service.register && await _service.register({ protocol })
   }
 
-
   async call({
     id,
     version = DEFAULT_SERVICE_VERSION,
