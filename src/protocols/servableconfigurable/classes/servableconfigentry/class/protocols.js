@@ -1,10 +1,9 @@
 export default [
-    'disposableorphansable',
-    'disposablechildrenable',
-    'publishable',
-    'localable',
-    'localeversionable',
-    'countryable',
-    'countryversionable',
-    'manualable'
+  'disposableorphansable',
+  'disposablechildrenable',
+  'localable',
+  'localeversionable',
+  'countryable',
+  'countryversionable',
+  'manualable'
 ]
