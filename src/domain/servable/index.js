@@ -1,7 +1,8 @@
-import Agenda from "agenda"
+// import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
-import LiveQueries from './livequeries/index.js'
+import _LiveQueries from './livequeries/index.js'
+import _Operations from './operations'
 import { Domain } from '@servable/tools'
 // import { Domain } from '../../../../tools/src/index.js'
 
@@ -20,6 +21,9 @@ export default class Servable extends BaseClass {
 
   get LiveQueries() { return this._liveQueries }
   set LiveQueries(value) { this._liveQueries = value }
+
+  get Operations() { return this._operations }
+  set Operations(value) { this._operations = value }
 
   get Express() { return this._express }
   set Express(value) { this._express = value }
@@ -48,8 +52,12 @@ export default class Servable extends BaseClass {
     await super.hydrate({ servableConfig, engine, app })
     this._servableConfig = servableConfig
     this._services = new Services()
-    this._liveQueries = new LiveQueries()
-    this._agenda = new Agenda()
+    this._liveQueries = new _LiveQueries()
+    // this._agenda = new Agenda()
+    this._operations = new _Operations({
+      servableConfig,
+      engine
+    })
     this._express = new Express()
     this.engine = engine
     this.App = await this._engine.adaptApp({ servableConfig })

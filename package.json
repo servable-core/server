@@ -69,6 +69,7 @@
     "mongodb": "^4.13.0",
     "mongoose": "^6.8.1",
     "mydockerjs": "^2.14.2",
+    "p-queue": "^8.1.0",
     "path-sanitizer": "^2.0.0",
     "semver": "*",
     "underscore": "^1.13.3",
