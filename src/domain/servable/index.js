@@ -61,6 +61,7 @@ export default class Servable extends BaseClass {
     this._express = new Express()
     this.engine = engine
     this.App = await this._engine.adaptApp({ servableConfig })
+
     this.Console = console
 
     if (this.App.Route) {

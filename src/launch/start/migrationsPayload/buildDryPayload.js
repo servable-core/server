@@ -24,7 +24,8 @@ export default async (props) => {
 
     if (semver.eq(to.version, from.version)) {
       const differences = diff(to.schema, from.schema)
-      if (!differences || differences.length) {
+      if (!differences
+        || differences.length) {
         return null
       }
 
