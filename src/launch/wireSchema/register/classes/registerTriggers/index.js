@@ -22,6 +22,7 @@ export default async ({
       try {
         await ProtocolTriggers.beforeSave({ request, protocol, protocolInstance, allProtocols })
         classTriggers && classTriggers.beforeSave && await classTriggers.beforeSave({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.beforesave && await classTriggers.beforesave({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeSave`, e.message)
       }
@@ -31,6 +32,7 @@ export default async ({
       try {
         await ProtocolTriggers.afterSave({ request, protocol, protocolInstance, allProtocols })
         classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.aftersave && await classTriggers.aftersave({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterSave`, e.message)
       }
@@ -40,6 +42,7 @@ export default async ({
       try {
         await ProtocolTriggers.beforeDelete({ request, protocol, protocolInstance, allProtocols })
         classTriggers && classTriggers.beforeDelete && await classTriggers.beforeDelete({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.beforedelete && await classTriggers.beforedelete({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ beforeDelete`, e.message)
       }
@@ -49,6 +52,7 @@ export default async ({
       try {
         await ProtocolTriggers.afterDelete({ request, protocol, protocolInstance, allProtocols })
         classTriggers && classTriggers.afterDelete && await classTriggers.afterDelete({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.afterdelete && await classTriggers.afterdelete({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterDelete`, e.message)
       }
