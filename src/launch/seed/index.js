@@ -17,11 +17,11 @@ export default async ({ schema, configuration, operationProps }) => {
 
   const cache = {}
   for (var i in candidates) {
-    const protocol = candidates[i]
+    const candidate = candidates[i]
     await handleProtocol({
       operationProps,
-      protocols: candidates,
-      protocol,
+      items: candidates,
+      item: candidate,
       cache,
       configuration
     })

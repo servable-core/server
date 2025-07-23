@@ -1,20 +1,20 @@
 import doPerform from './doSeed.js'
 
 const perform = async ({
-  protocol,
-  protocols,
+  item,
+  items,
   cache,
   operationProps,
   configuration }) => {
 
-  const { metadata, } = protocol
-  if (cache[protocol.id]) {
+  const { metadata, } = item
+  if (cache[item.id]) {
     return
   }
 
   if (!metadata || !metadata.dependencies || !metadata.dependencies.length) {
-    await doPerform({ protocol, operationProps, configuration })
-    cache[protocol.id] = true
+    await doPerform({ protocol: item, operationProps, configuration })
+    cache[item.id] = true
     return
   }
 
@@ -27,13 +27,13 @@ const perform = async ({
       return
     }
 
-    const candidates = protocols.filter(a => a.id === id)
+    const candidates = items.filter(a => a.id === id)
     if (!candidates || !candidates.length) {
       return
     }
     const candidate = candidates[0]
     await perform({
-      items: protocols,
+      items: items,
       cache,
       operationProps,
       configuration,
@@ -42,8 +42,8 @@ const perform = async ({
 
   }
 
-  await doPerform({ protocol, operationProps, configuration })
-  cache[protocol.id] = true
+  await doPerform({ protocol: item, operationProps, configuration })
+  cache[item.id] = true
 }
 
 export default perform
