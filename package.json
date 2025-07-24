@@ -55,7 +55,7 @@
     "trailingComma": "es5"
   },
   "dependencies": {
-    "@servable/tools": "^1.4.0",
+    "@servable/tools": "^1.4.1",
     "agenda": "*",
     "axios": "^1.7.2",
     "docker-compose": "0.24.1",
