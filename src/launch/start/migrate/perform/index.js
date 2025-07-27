@@ -1,6 +1,6 @@
 import didMigrateStepSuccessfully from '../../launchers/auxiliary/didMigrateStepSuccessfully/index.js'
-import { buildSchema } from '@servable/tools'
-// import { buildSchema } from '../../../../../../tools/src/index.js'
+// import { buildSchema } from '@servable/tools'
+import { buildSchema } from '../../../../../../tools/src/index.js'
 import handleTask from './handleTask.js'
 
 export default async (props) => {

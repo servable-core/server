@@ -1,5 +1,5 @@
 import stateForConfiguration from '../../../lib/utilsDatabase/classes/parseServerState/functions/stateForConfiguration.js'
-import _migrations from './migrations.js'
+import computeMigrations from './migrations.js'
 
 const MAX_ATTEMPTS = 5
 const MAX_DURATION = 10 //in second
@@ -18,7 +18,7 @@ export default async (props) => {
   }
 
   const productionStateItem = await stateForConfiguration({ configuration })
-  const migrations = await _migrations({ schema, stateItem: productionStateItem })
+  const migrations = await computeMigrations({ schema, stateItem: productionStateItem })
 
   switch (productionStateItem.migrationState) {
     case MigrationStateEnum.Initial: {
