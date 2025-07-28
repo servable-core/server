@@ -3,8 +3,8 @@ import Express from './express/index.js'
 import Services from './services/index.js'
 import _LiveQueries from './livequeries/index.js'
 import _Operations from './operations/index.js'
-// import { Domain } from '@servable/tools'
-import { Domain } from '../../../../tools/src/index.js'
+import { Domain } from '@servable/tools'
+// import { Domain } from '../../../../tools/src/index.js'
 
 const { Servable: BaseClass } = Domain
 
