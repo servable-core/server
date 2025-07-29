@@ -1795,10 +1795,10 @@
     lodash-es "^4.17.21"
     read-pkg-up "^11.0.0"
 
-"@servable/tools@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-1.5.0.tgz#26aad31a3a2b1dad5bf49ff036e0818d9ee331ad"
-  integrity sha512-VWFpO8Ohvd1dti5b1MWpyuiBvoI9hqOHv0yNOYBWPIHnVs5tf7vRGsJ5mCtUD9SKuctjflocpU+3xeK3LTs5Ig==
+"@servable/tools@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-1.6.0.tgz#9580873f04a8f11b5aea22a5e07ba7a6621fbc8c"
+  integrity sha512-/lXyoguTc+8q+kN0Azc8k+kj/p/tTifna30rumwpDsHHuKEX6bEOxkS9/d+yGNAddIG/WTWCERl8wrkaxpNzjQ==
   dependencies:
     fast-glob "^3.3.2"
     fs-extra "^11.2.0"
