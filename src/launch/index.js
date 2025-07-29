@@ -43,7 +43,7 @@ export default async ({ servableConfig, engine }) => {
     // Servable.Console.log("[Servable]", '[DEBUG]', `Launch > created an expres app`, Servable.Express.app)
 
     const staticSchema = await buildSchema({ servableConfig })
-    console.info("[Servable]", staticSchema)
+    // console.info("[Servable]", staticSchema)
     const { isValid, issues, message } = await validateSchema({ schema: staticSchema })
     if (!isValid) {
       throw new Error(message)
