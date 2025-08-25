@@ -20,7 +20,14 @@ export const beforeSave = async ({
 }
 
 export const afterSave = async ({ request, allProtocols, protocol, protocolInstance }) => {
-  await execute({
+  // await execute({
+  //   allProtocols,
+  //   protocol,
+  //   protocolInstance,
+  //   request,
+  //   operationName: 'afterSave'
+  // })
+  execute({
     allProtocols,
     protocol,
     protocolInstance,

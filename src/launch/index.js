@@ -11,6 +11,7 @@ import printEnd from './_messages/end.js'
 import launchSystem from "./system/index.js"
 import config from "./config/index.js"
 import { buildSchema, validateSchema } from '@servable/tools'
+import beforeEnd from "./beforeend/index.js"
 // import { buildSchema, validateSchema } from '../../../tools/src/index.js'
 // import mockDocumentation from "./mockDocumentation.js"
 // import memwatch from 'node-memwatch-x'
@@ -113,13 +114,16 @@ export default async ({ servableConfig, engine }) => {
       servableConfig,
       engine
     })
+
     await registerClasses({
       schema
     })
+
     await liveServer({
       httpServer,
       engine
     })
+
     await wireSchema({
       schema,
       servableConfig
@@ -140,11 +144,22 @@ export default async ({ servableConfig, engine }) => {
         configuration,
       }
     })
+
     await config({
       schema,
       configuration,
     })
+
     await afterInit({
+      app,
+      schema,
+      configuration,
+      server,
+      servableConfig,
+      engine
+    })
+
+    beforeEnd({
       app,
       schema,
       configuration,

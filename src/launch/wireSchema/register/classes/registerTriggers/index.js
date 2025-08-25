@@ -30,9 +30,12 @@ export default async ({
 
     Servable.App.Cloud.afterSave(className, async (request) => {
       try {
-        await ProtocolTriggers.afterSave({ request, protocol, protocolInstance, allProtocols })
-        classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, protocol, protocolInstance })
-        classTriggers && classTriggers.aftersave && await classTriggers.aftersave({ request, protocol, protocolInstance })
+        // await ProtocolTriggers.afterSave({ request, protocol, protocolInstance, allProtocols })
+        // classTriggers && classTriggers.afterSave && await classTriggers.afterSave({ request, protocol, protocolInstance })
+        // classTriggers && classTriggers.aftersave && await classTriggers.aftersave({ request, protocol, protocolInstance })
+        ProtocolTriggers.afterSave({ request, protocol, protocolInstance, allProtocols })
+        classTriggers && classTriggers.afterSave && classTriggers.afterSave({ request, protocol, protocolInstance })
+        classTriggers && classTriggers.aftersave && classTriggers.aftersave({ request, protocol, protocolInstance })
       } catch (e) {
         console.error(`[Class ${className}] ⚠️ afterSave`, e.message)
       }

@@ -3,5 +3,9 @@
         "activityBar.background": "#0F332B",
         "titleBar.activeBackground": "#15483C",
         "titleBar.activeForeground": "#F5FCFB"
+    },
+    "yaml.schemas": {
+        "file:///Users/anak/.vscode/extensions/docsmsft.docs-yaml-1.0.5/dist/toc.schema.json": "/toc\\.yml/i",
+        "https://www.artillery.io/schema.json": []
     }
 }

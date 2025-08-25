@@ -1,7 +1,4 @@
-// import quotePlain from "../../lib/utils/quotePlain.js"
-
 export default () => {
-
   console.log("[Servable]",
     `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯`
   )
@@ -24,14 +21,4 @@ export default () => {
   console.log("[Servable]",
     `⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯`
   )
-  // console.log("[Servable]", `🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀`)
-  // console.log("[Servable]", `Oh, my love, my darling
-  //   I've hungered for your touch
-  //   A long, lonely time
-  //   Time goes by so slowly
-  //   And time can do so much
-  //   Are you still mine?
-  //   I need your love
-  //   I need your love
-  //   God speed your love to me`)
 }

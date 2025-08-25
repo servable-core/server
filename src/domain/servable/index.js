@@ -9,12 +9,16 @@ import { Domain } from '@servable/tools'
 const { Servable: BaseClass } = Domain
 
 export default class Servable extends BaseClass {
+  _process = null
   _express = null
   _schema = null
   _httpServer = null
   _servableConfig = null
   _config = {}
   _engine = null
+
+  get Process() { return this._process }
+  set Process(value) { this._process = value }
 
   get Services() { return this._services }
   set Services(value) { this._services = value }
@@ -59,6 +63,7 @@ export default class Servable extends BaseClass {
       engine
     })
     this._express = new Express()
+    this._process = {}
     this.engine = engine
     this.App = await this._engine.adaptApp({ servableConfig })
 
