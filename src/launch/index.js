@@ -192,14 +192,24 @@ export default async ({ servableConfig, engine }) => {
         }
       },
       paths: ['/health-check', '/healthcheck'],
-      handler: async () => "Health check passed"
+      handler: async () => {
+        console.log('health check pinged: success')
+        return "Health check passed"
+      }
     })
   } catch (e) {
     console.error('[SERVABLE]', 'launch', e)
     Servable.App.Route.define({
       method: "get",
+      cache: {
+        type: "inMemory",
+        params: {
+          window: 10
+        }
+      },
       path: '/health-check',
       handler: async (_, response) => {
+        console.log('health check pinged: error')
         response.status(500).send('Server failed')
       }
     })
