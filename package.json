@@ -58,6 +58,7 @@
     "@servable/tools": "^1.6.2",
     "agenda": "*",
     "axios": "^1.7.2",
+    "cookie": "^1.0.2",
     "docker-compose": "0.24.1",
     "ejs": "^3.1.10",
     "get-port": "^6.1.2",

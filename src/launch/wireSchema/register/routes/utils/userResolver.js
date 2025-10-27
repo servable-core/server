@@ -1,7 +1,7 @@
 export default async ({
   request,
 }) => {
-  const sessiontoken = request.headers['x-servable-session-token']
+  const sessiontoken = getSessionToken(request)
   if (!sessiontoken) {
     return null
   }
@@ -27,4 +27,26 @@ export default async ({
     console.error(e)
     return null
   }
+}
+
+
+import cookie from 'cookie'; // built-in parser lib (lightweight)
+
+function getSessionToken(request) {
+  // 1️⃣ First, try custom header (for partner APIs, etc.)
+  const headerToken = request.headers['x-servable-session-token'];
+  if (headerToken) return headerToken;
+
+  // 2️⃣ Then, try cookie-parser's output
+  const parsedCookie = request.cookies?.['x-servable-session-token'];
+  if (parsedCookie) return parsedCookie;
+
+  // 3️⃣ Finally, parse raw cookie header if needed
+  const raw = request.headers.cookie;
+  if (raw) {
+    const cookies = cookie.parse(raw);
+    return cookies['x-servable-session-token'] || null;
+  }
+
+  return null;
 }

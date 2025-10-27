@@ -13,7 +13,7 @@ export default async ({
   if (route.path.indexOf(targetPlaceholder) === -1) {
     let path = route.path.toLowerCase()
 
-
+    //#TODO:P1: Servable.App.Route.define should include servableArguments by default for functions called outside protocols
     return Servable.App.Route.define({
       ...route,
       prefix,
