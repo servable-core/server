@@ -20,7 +20,7 @@ export default async ({
   engine
 }) => {
   try {
-    const projectName = sanitizePath(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
+    const projectName = sanitizePath.default(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
     const executionDockerComposePath = targetDockerPath({
       protocol
     })

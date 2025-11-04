@@ -1795,10 +1795,10 @@
     lodash-es "^4.17.21"
     read-pkg-up "^11.0.0"
 
-"@servable/tools@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-1.6.2.tgz#2ca0210b54f69116e7507e6cd681db1f1e5a8bed"
-  integrity sha512-pLAFAf/IY4OWvDsSOvpwsZ4NGR/7bSm4lAR6ri2huXgjz6kxgMx+pYTVb4PsECIbrYCJXpf8A4aB8Vi+98w0EA==
+"@servable/tools@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-1.6.3.tgz#eebf42edee545ac5d3f4f92f7ff8d4c0c6d75172"
+  integrity sha512-0issUV7djphHAHcFkfriCFDyODS0zJ6c0E4d7sECzaCV8uDPcw5UWsxzkA/I3VkqiWyCVvkvss3ee5p8V4S5Ww==
   dependencies:
     fast-glob "^3.3.2"
     fs-extra "^11.2.0"
@@ -1808,7 +1808,7 @@
     json2md "^2.0.0"
     mime "^4.0.0"
     parse-comments "^1.0.0"
-    path-sanitizer "^2.0.0"
+    path-sanitizer "^3.1.0"
     semver "^7.5.4"
     underscore "^1.13.3"
 
@@ -7956,10 +7956,10 @@ path-parse@^1.0.7:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
   integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
 
-path-sanitizer@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/path-sanitizer/-/path-sanitizer-2.0.0.tgz#b5068d38cfb0b17c2e8b8451b7ed1bae320267f7"
-  integrity sha512-LvVN3i5Ln64IwxR0SEmLxYP2RhrjWDc00F0lrYo5bAAkMlDafERh0TS03AxO+RPDDnzvuO8v2YpgXi9EshrTYQ==
+path-sanitizer@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/path-sanitizer/-/path-sanitizer-3.1.0.tgz#0b878e08cb13929ef36066cddfadad170e9c167a"
+  integrity sha512-JNW7p4VYl7tm9sLep/z/YANU/z/YsWArrcfCIZPScLoKymk8guxXEDcE9C77Lt9t7EKz8FtHHx0CO7rQpw34Xg==
 
 path-scurry@^1.10.1:
   version "1.10.1"
