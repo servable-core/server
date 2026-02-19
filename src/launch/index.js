@@ -193,7 +193,7 @@ export default async ({ servableConfig, engine }) => {
       },
       paths: ['/health-check', '/healthcheck'],
       handler: async () => {
-        console.log('health check pinged: success')
+        // console.log('health check pinged: success')
         return "Health check passed"
       }
     })

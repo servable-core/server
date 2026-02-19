@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Audit: Generate audit.json",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "args": ["audittojson"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
+

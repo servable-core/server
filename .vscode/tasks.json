@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Audit: Generate audit.json",
+      "type": "shell",
+      "command": "yarn",
+      "args": ["audittojson"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "detail": "Runs yarn audit --groups dependencies --json > audit.json"
+    }
+  ]
+}
+

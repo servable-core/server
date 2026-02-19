@@ -38,7 +38,11 @@
     "test:lint": "eslint .",
     "test:unit_": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:unit": "yarn node --require=dotenv/config --experimental-vm-modules --experimental-specifier-resolution=node $(yarn bin jest) --config ./jest.config.json",
-    "test:watch": "react-scripts test --env=jsdom"
+    "test:watch": "react-scripts test --env=jsdom",
+    "prepare": "husky install",
+    "audit": "yarn audit --level high",
+    "audit:signatures": "npm audit signatures",
+    "audittojson": "yarn audit --groups dependencies --json > audit.json"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+. "./_/husky.sh"
+
+yarn audittojson || true

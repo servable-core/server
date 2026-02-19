@@ -1,6 +1,20 @@
 # The release pipeline will run only on the master branch a commit is triggered
 stages:
+  - security
   - release
+
+security_audit:
+  image: node:20-alpine
+  stage: security
+  before_script:
+    - corepack enable
+  script:
+    - yarn --version
+    - yarn --frozen-lockfile
+    - yarn audit --level high
+    - npm audit signatures
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 release:
   image: node:12-buster-slim
