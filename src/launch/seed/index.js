@@ -3,7 +3,6 @@ import handleProtocol from './handleProtocol/index.js'
 import _ from 'underscore'
 
 export default async ({ schema, configuration, operationProps }) => {
-
   const {
     protocols
   } = schema
