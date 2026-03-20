@@ -93,9 +93,6 @@ export default async ({ servableConfig, engine }) => {
     // Servable.Console.log("[Servable]", `Launch > started the parse server`)
 
     const { schema, server, configuration } = serverStruct
-    // Servable.Console.log('servableConfig', servableConfig, 'serverStruct', serverStruct,)
-    // Servable.Console.log("[Servable]", 'protocols.length>>', schema.protocols.length,)
-    // Servable.Console.log('protocols _schema', _schema.protocols.length, _schema.protocols)
 
 
     if (configuration.params.skipWiring) {
