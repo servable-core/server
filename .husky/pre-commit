@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
-. "./_/husky.sh"
+. "$(dirname -- "$0")/_/husky.sh"
 
 yarn audittojson || true
