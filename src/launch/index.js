@@ -175,6 +175,14 @@ export default async ({ servableConfig, engine }) => {
 
     Servable.App.Route.define({
       method: "get",
+      cache: {
+        configurations: [
+          {
+            storage: "inMemory",
+            window: 10
+          }
+        ]
+      },
       rateLimiting: {
         type: "fixedByIp",
         params: {
@@ -194,10 +202,12 @@ export default async ({ servableConfig, engine }) => {
     Servable.App.Route.define({
       method: "get",
       cache: {
-        type: "inMemory",
-        params: {
-          window: 10
-        }
+        configurations: [
+          {
+            storage: "inMemory",
+            window: 10
+          }
+        ]
       },
       path: '/health-check',
       handler: async (_, response) => {
