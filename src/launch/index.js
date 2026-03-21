@@ -175,12 +175,6 @@ export default async ({ servableConfig, engine }) => {
 
     Servable.App.Route.define({
       method: "get",
-      cache: {
-        type: "inMemory",
-        params: {
-          window: 10
-        }
-      },
       rateLimiting: {
         type: "fixedByIp",
         params: {
