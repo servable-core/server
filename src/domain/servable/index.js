@@ -3,6 +3,7 @@ import Express from './express/index.js'
 import Services from './services/index.js'
 import _LiveQueries from './livequeries/index.js'
 import _Operations from './operations/index.js'
+import TransactionContract from './transaction/index.js'
 import { Domain } from '@servable/tools'
 // import { Domain } from '../../../../tools/src/index.js'
 
@@ -66,6 +67,10 @@ export default class Servable extends BaseClass {
     this._process = {}
     this.engine = engine
     this.App = await this._engine.adaptApp({ servableConfig })
+
+    if (!this.App.Transaction) {
+      this.App.Transaction = TransactionContract
+    }
 
     this.Console = console
 
