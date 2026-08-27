@@ -1,6 +1,38 @@
+import resolveAuthConfig from '../../../../../lib/auth/authConfig.js'
+import { verifyAccessToken } from '../../../../../lib/auth/tokenRotation.js'
+
 export default async ({
   request,
 }) => {
+  // Bearer access token (new, short-lived JWT) takes priority when present and configured -
+  // it's self-contained (no _Session lookup needed) and is what a client sends once it has
+  // completed at least one refresh. AUTH_JWT_SECRET being unset means this deployment hasn't
+  // opted into access tokens at all; falling through to the legacy cookie keeps every existing
+  // app working with zero config changes.
+  const authConfig = resolveAuthConfig()
+  if (authConfig.jwtSecret) {
+    const authHeader = request.headers?.['authorization'] || ''
+    const match = authHeader.match(/^Bearer\s+(.+)$/i)
+    if (match) {
+      const decoded = verifyAccessToken({ token: match[1], secret: authConfig.jwtSecret })
+      if (decoded?.sub) {
+        try {
+          const user = await new Servable.App.Query('_User').get(decoded.sub, { useMasterKey: true })
+          if (user) {
+            // Transient, request-scoped only - never persisted (no .set()/.save() involved).
+            // Lets a requireStepUp route locate the exact _Session this request authenticated
+            // with (via processHttp's checkStepUpFreshness call) without a second full lookup -
+            // the JWT payload already carries the session id (sid), no query needed here.
+            user._authSessionId = decoded.sid
+            return user
+          }
+        } catch (e) {
+          // Fall through to legacy resolution below (e.g. user deleted since token was issued).
+        }
+      }
+    }
+  }
+
   const sessiontoken = getSessionToken(request)
   if (!sessiontoken) {
     return null
@@ -22,6 +54,7 @@ export default async ({
       return null
     }
 
+    user._authSessionId = session.id
     return user
   } catch (e) {
     console.error(e)

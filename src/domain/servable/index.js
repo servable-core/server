@@ -4,6 +4,10 @@ import Services from './services/index.js'
 import _LiveQueries from './livequeries/index.js'
 import _Operations from './operations/index.js'
 import TransactionContract from './transaction/index.js'
+import mintSessionTokens from './user/mintSessionTokens.js'
+import refreshSessionTokens from './user/refreshSessionTokens.js'
+import checkStepUpFreshness from './user/checkStepUpFreshness.js'
+import confirmStepUp from './user/confirmStepUp.js'
 import { Domain } from '@servable/tools'
 // import { Domain } from '../../../../tools/src/index.js'
 
@@ -70,6 +74,26 @@ export default class Servable extends BaseClass {
 
     if (!this.App.Transaction) {
       this.App.Transaction = TransactionContract
+    }
+
+    // Additional functions this package provides on Servable.App.User on top of whatever the
+    // engine's own User implementation exposes (Parse.User's logIn, logInWith, signUp, become,
+    // ... - see engines/parse-server/src/register/index.js). Guarded the same way as Transaction
+    // above: an engine that someday implements these itself always wins, this never overrides a
+    // name that's already there.
+    if (this.App.User) {
+      if (!this.App.User.mintSessionTokens) {
+        this.App.User.mintSessionTokens = mintSessionTokens
+      }
+      if (!this.App.User.refreshSessionTokens) {
+        this.App.User.refreshSessionTokens = refreshSessionTokens
+      }
+      if (!this.App.User.checkStepUpFreshness) {
+        this.App.User.checkStepUpFreshness = checkStepUpFreshness
+      }
+      if (!this.App.User.confirmStepUp) {
+        this.App.User.confirmStepUp = confirmStepUp
+      }
     }
 
     this.Console = console
