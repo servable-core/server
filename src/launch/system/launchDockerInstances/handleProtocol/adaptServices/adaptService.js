@@ -1,5 +1,6 @@
 import updateVolumeDestination from './adaptVolume.js'
 import adaptEnvironmentVariable from './adaptEnvironmentVariable.js'
+import adaptHealthcheck from './adaptHealthcheck.js'
 // import adaptCommand from './adaptCommand.js'
 import _ from 'underscore'
 
@@ -29,7 +30,14 @@ export default async ({
     }
   }
 
-  let { volumes, environment, command } = service
+  let { volumes, environment, command, healthcheck } = service
+  if (healthcheck) {
+    healthcheck = await adaptHealthcheck({
+      healthcheck,
+      servableConfig
+    })
+  }
+
   if (volumes && volumes.length) {
     volumes = volumes.map(volume => {
       return updateVolumeDestination({
@@ -73,6 +81,7 @@ export default async ({
     ...service,
     volumes,
     environment,
+    healthcheck,
     // command,
     networks: [networkName]
   }
