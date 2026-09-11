@@ -20,7 +20,19 @@ export default async ({
   engine
 }) => {
   try {
-    const projectName = sanitizePath.default(`${servableConfig.id}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
+    // Optional per-worktree/per-checkout isolation: servableConfig.system.docker.namespace.
+    // servableConfig.id is normally the same across every worktree of the same app (it's the
+    // app's own identity, not a checkout identity), so two worktrees sharing this docker-compose
+    // template collide on both the compose project name AND any hardcoded `container_name:` in
+    // the file - Docker treats a literal container_name as a single, unique resource regardless
+    // of which project/directory asked for it, unlike ports (already handled automatically via
+    // getPortNear.js, see adaptServicesPorts/adaptPort.js) or bind-mount volumes (already unique
+    // per worktree, since they're relative to each worktree's own directory). Setting this once,
+    // e.g. `system: { docker: { namespace: 'unischema' } }`, makes the project name unique here
+    // and suffixes every explicit container_name in adaptContainerName.js - unset, this is a
+    // complete no-op, byte-identical to before.
+    const dockerNamespace = servableConfig.system?.docker?.namespace
+    const projectName = sanitizePath.default(`${servableConfig.id}${dockerNamespace ? `-${dockerNamespace}` : ''}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
     const executionDockerComposePath = targetDockerPath({
       protocol
     })

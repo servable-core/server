@@ -1,6 +1,7 @@
 import updateVolumeDestination from './adaptVolume.js'
 import adaptEnvironmentVariable from './adaptEnvironmentVariable.js'
 import adaptHealthcheck from './adaptHealthcheck.js'
+import adaptContainerName from './adaptContainerName.js'
 // import adaptCommand from './adaptCommand.js'
 import _ from 'underscore'
 
@@ -30,7 +31,9 @@ export default async ({
     }
   }
 
-  let { volumes, environment, command, healthcheck } = service
+  let { volumes, environment, command, healthcheck, container_name: containerName } = service
+  containerName = adaptContainerName({ containerName, servableConfig })
+
   if (healthcheck) {
     healthcheck = await adaptHealthcheck({
       healthcheck,
@@ -82,6 +85,7 @@ export default async ({
     volumes,
     environment,
     healthcheck,
+    ...(containerName ? { container_name: containerName } : {}),
     // command,
     networks: [networkName]
   }

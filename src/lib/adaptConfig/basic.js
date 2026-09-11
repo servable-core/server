@@ -72,11 +72,20 @@ export default ({ servableConfig }) => {
     servableConfig.system = {}
   }
 
+  // Per-key defaulting, not "is the whole object missing" - a servableConfig that only sets
+  // system.docker.namespace (see handleProtocol/index.js's own comment on why that field exists)
+  // would otherwise silently lose enabled/environments entirely, since the old check treated any
+  // caller-provided system.docker as "fully specified, nothing to default."
   if (!servableConfig.system.docker) {
-    servableConfig.system.docker = {
-      enabled: true,
-      environments: ['development']
-    }
+    servableConfig.system.docker = {}
+  }
+
+  if (servableConfig.system.docker.enabled === undefined) {
+    servableConfig.system.docker.enabled = true
+  }
+
+  if (!servableConfig.system.docker.environments) {
+    servableConfig.system.docker.environments = ['development']
   }
 
   if (!servableConfig.protocols) {
