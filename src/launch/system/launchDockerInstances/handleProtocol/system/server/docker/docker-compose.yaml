@@ -5,7 +5,13 @@ services:
       # ALLOW_EMPTY_PASSWORD is recommended only for app.
       ALLOW_EMPTY_PASSWORD: yes
       # REDIS_PASSWORD : REDIS_PWD_TO_CHANGE
-      REDIS_DISABLE_COMMANDS : FLUSHDB,FLUSHALL
+      # Deliberately NOT disabling FLUSHDB/FLUSHALL here (unlike a real data store, this is a
+      # pure cache instance - flushing it is safe by design, nothing is lost that isn't
+      # immediately rebuildable). Parse Server's own built-in RedisCacheAdapter
+      # (createCacheAdapter() in @servable/parse-server-engine's setConfigurations/adapters/
+      # cache.js) calls FLUSHDB on connect as documented library behavior - disabling it here
+      # made every boot that configures SERVABLE_REDIS_CACHE_URI crash with "unknown command
+      # `FLUSHDB`" the moment the cache adapter connected. Confirmed via a real boot.
     ports:
       - 6379:6379
     volumes:
