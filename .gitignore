@@ -24,3 +24,6 @@ package.dist.json
 dist
 _archive
 audit.json
+
+# local Claude Code settings - not meant to be shared via this public repo
+.claude/

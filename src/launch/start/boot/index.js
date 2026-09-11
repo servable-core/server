@@ -1,72 +1,26 @@
-import migrate from '../migrate/index.js'
+import checkSchemaCompatibility from '../schemaState/checkSchemaCompatibility.js'
 import quit from './quit.js'
-import qualify from './qualify.js'
 
-export default async ({
-  servableConfig,
-  app,
-  schema,
-  engine }) => {
+// Replaces qualify.js + migrate/ + migrationsPayload/ - see .docs/technical/unischema-plan.md.
+// No more MigrationStateEnum, no more per-pod "should I be the one to migrate" coordination:
+// checkSchemaCompatibility() either says this build is safe to boot (drift-free, floor-
+// compatible) or throws, and engine.launch() always applies the full schema additively - see
+// that function's own comment for why the migrate/no-migrate distinction no longer exists
+// either. quit() is kept only for this one remaining failure path (an incompatible/stale build
+// trying to boot in production) - it no longer has a "someone else is migrating, retry" case to
+// also cover, since there is no longer anything to wait out.
+export default async ({ servableConfig, app, schema, engine }) => {
+  const { configuration } = servableConfig
 
-  const {
-    stateItem,
-    configuration,
-    shouldQuit,
-    shouldQuitError,
-    shouldMigrate,
-    waitBeforeQuit,
-    migrations
-  } = await qualify({
-    servableConfig,
-    app,
-    schema,
-    engine,
-    schema,
-  })
-
-  const hasBeenInitialized = stateItem.lastMigrationEndedAt
-  let result
-
-  if (shouldQuit) {
-    console.log('[SERVABLE]', '[DEBUG]', 'boot>production should quit')
-    quit({
-      delay: waitBeforeQuit,
-      error: shouldQuitError
-    })
-    return
+  try {
+    await checkSchemaCompatibility({ schemaBuildResult: schema, servableConfig })
+  } catch (error) {
+    console.error('[SERVABLE]', '[DEBUG]', 'boot> schema compatibility check failed', error.message)
+    quit({ delay: 0, error })
+    return null
   }
 
-  if (shouldMigrate) {
-    console.log('[SERVABLE]', '[DEBUG]', 'boot>production should migrate')
-    result = await migrate({
-      app,
-      hasBeenInitialized,
-      schema,
-      migrationPayload: migrations,
-      servableConfig,
-      configuration: configuration,
-      engine
-    })
-
-    if (result.error) {
-      console.log('[SERVABLE]', '[DEBUG]', 'boot>production result error', result.error)
-      quit(result)
-      return null
-    }
-
-    return {
-      ...result,
-      schema,
-      configuration
-    }
-  }
-
-  console.log('[SERVABLE]', '[DEBUG]', 'boot>launch with no migration')
-  result = await engine.launchWithNoMigration({
-    app,
-    schema,
-    configuration
-  })
+  const result = await engine.launch({ app, schema, configuration })
 
   return {
     ...result,

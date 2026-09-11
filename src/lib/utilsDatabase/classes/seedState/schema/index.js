@@ -8,7 +8,6 @@ export default new Schema({
     createdAt: { type: Date, default: Date.now },
     lastOperationStartedAt: Date,
     lastOperationEndedAt: Date,
-    migrationFailureError: String,
     entityId: String,
     type: String,
     mode: String,

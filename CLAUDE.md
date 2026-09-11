@@ -1,0 +1,59 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+For fast copy-paste usage (including the `Servable.App.Transaction` taxonomy), see `QUICKREF.md`.
+
+## What this repo is
+
+`@servable/server` — the engine-agnostic orchestrator. `launch({ servableConfig, engine })` (`src/launch/index.js`) is the single entry point every app calls: adapts config, hydrates `global.Servable` via the given engine (`engine.createApp()` + `ServableClass().hydrate()`, which calls `engine.adaptApp()`), builds and validates the schema, brings up local system dependencies (`launch/system/` — docker-compose orchestration for local dev, unrelated to schema), then boots (`launch/start/`) and wires everything (`launch/wireSchema/`).
+
+Defines the *taxonomy* (contracts) engines implement — `Servable.App.Transaction`'s shape, for instance (see `QUICKREF.md`) — with safe no-op fallbacks so `Servable.App.X` is never `undefined` even for an engine that hasn't wired real support for `X`.
+
+## unischema — what boot does now, and what it used to do
+
+See `.docs/technical/unischema-plan.md` (workspace root) for the full plan and reasoning.
+
+**Removed entirely**: `launch/start/boot/qualify.js`, `launch/start/migrate/`, `launch/start/migrationsPayload/`, `launch/start/launchers/auxiliary/{didMigrateStepSuccessfully,didMigrateSuccessfully,didNotMigrateError,willMigrate,didConsumeValidation}/`, `launch/start/handleDistribution/` (a pod-A-sees-pod-B-migrating watcher that was already fully dead — its body was entirely commented out, and even uncommented its imports pointed at a path that no longer existed), `lib/utilsDatabase/classes/parseServerState/` (the `MigrationStateEnum`/`migrationsAttempts`/version-comparison machinery). None of it is read or written anywhere in the new code — a rollback to a pre-unischema image finds `ParseServerState` exactly as it left it.
+
+Also removed, found later by a direct audit rather than by the original sweep: `migrationFailureError: String` in `lib/utilsDatabase/classes/{seedState,configState}/schema/index.js` — copy-paste residue from the same shared schema template as `ParseServerState`, with zero references anywhere outside its own declaration. Everything else in those two schemas (`state`/`version`/`dataSHA`/`lastOperationStartedAt`/`lastOperationEndedAt`) is genuinely active and unrelated to migration — this was the one literal migration-branded leftover in a place otherwise correctly identified as out of scope. If you're auditing this package for anything else migration-shaped later, `grep -ri migrat` across `src/` is exactly how this was found — it comes back clean now.
+
+**What replaced it**: `launch/start/boot/index.js` now does exactly one thing before calling `engine.launch()` — `launch/start/schemaState/checkSchemaCompatibility.js`, which either says this build is safe to boot or throws (caught by `boot/index.js`, which calls `quit()` the same way the old machinery did on a hard failure). Two independent checks inside it:
+
+1. **Drift** (hard-fail, every environment) — the artifact `normalizeArtifact()` produces from *this boot's own* `buildSchema()` result must hash-match the committed `servable.schema.json`. A mismatch means someone edited a protocol's `schema.json` without running `servable schema build`/`apply` before committing.
+2. **Compatibility floor** — refuses to boot if this build's own `compatibilityFloor` (read off the committed artifact) is *lower* than what's recorded in `ServableSchemaState` (`lib/utilsDatabase/classes/schemaState/`, a **new** collection in the same util database `ParseServerState` used, not the same one). That's the actual answer to "pod A on schema n, pod B migrates to n+1, A left with a mismatched DB": additive changes never move the floor (so this never fires for the overwhelming majority of deploys), and a floor bump only ever comes from `servable schema contract` — a newer deploy that already removed something this build's code might still expect.
+
+On success, `checkSchemaCompatibility` calls `recordAppliedArtifact` (same `schemaState/` module), which upserts `ServableSchemaState` with this build's hash and raises the stored floor to match if this build's is higher — never lowers it.
+
+**No more apply lock, at any level.** The old coordination existed because two pods running arbitrary `up.js`/`down.js` migration scripts concurrently was a real correctness problem. After unischema, boot only ever does additive schema convergence (Parse's own `_SCHEMA` upsert, already idempotent — `deleteExtraFields: false`/`recreateModifiedFields: false` in the engine's `doLaunch`). Two pods doing that concurrently both end in the same state. Nothing to protect, so nothing was replaced.
+
+## Production scenarios and test coverage
+
+See `.docs/technical/unischema-plan.md`'s "Production scenarios" section for the full nominal/edge-case walkthrough of what actually happens with two pods on different builds sharing one database (the original "pod A on schema n, pod B migrates to n+1" question) — worked through against this package's own code, not just the general design.
+
+One real bug was found and fixed while writing that section, worth calling out here since it's easy to reintroduce: `recordAppliedArtifact.js` used to do a separate `findOne` read followed by a `findOneAndUpdate` write, computing `Math.max(existing, own floor)` in JS between the two. That's safe for two pods on the *same* build racing, but not for two pods on **different** builds — an old, low-floor pod's stale read-then-write could regress an already-raised floor back down if its write landed after a new, high-floor pod's write. Confirmed against a real MongoDB before fixing it. Now a single atomic aggregation-pipeline `findOneAndUpdate` (`compatibilityFloor: { $max: [...] }`, evaluated by MongoDB at write time — no intervening read to go stale). **Don't go back to a read-then-write shape here without re-proving it's race-free the same way `tests/integration/recordAppliedArtifact.test.js` does.**
+
+Tests:
+- `tests/unit/checkSchemaCompatibility.test.js` — every scenario from the plan doc's walkthrough, mocked (no real MongoDB), named to match that section.
+- `tests/integration/recordAppliedArtifact.test.js` — the concurrent-write race specifically, against a real local MongoDB (skips itself if none is reachable). This is the one test in this package that talks to a real database directly rather than through `launch()` — see "Testing gotcha" below for why `launch()` itself is avoided in tests.
+
+## Testing gotcha
+
+`checkSchemaCompatibility` takes `schemaBuildResult` (launch's own `buildSchema()` output) and calls `@servable/tools`' `normalizeArtifact()` on it directly — never re-run `buildSchema()` a second time to check drift, that defeats the point of splitting `normalizeArtifact`/`compileArtifact` the way `@servable/tools` does (see that package's own `CLAUDE.md`).
+
+Never call `@servable/server`'s own `launch()`/`launchSystem` from a test — it triggers a real docker-compose recreation of shared local dev infrastructure (redis, clickhouse, minio, the app's own mongo, etc.), which has actually happened once and briefly took 13 shared containers down. Drive `checkSchemaCompatibility()` (or its collaborators) directly against mocks or a real, already-running scratch MongoDB instead, exactly like the two test files above do.
+
+## This package's own bundled protocols
+
+`src/protocols/` (`uniquerefable`, `servableconfigurable`, `servableautoseedable`, `manualable`, plus three schema-less trigger-only ones — `disposableorphansable`/`disposablechildrenable`/`disposablefromqueryorphansable`) are framework-provided protocols every app gets for free: `lib/adaptConfig/basic.js` unconditionally prepends this directory to `servableConfig.protocols.local` on every real boot, ahead of the app's own `protocols/`. Migrated the four with schema content to flat `schema.json` (same convention as everywhere else — see `.docs/technical/unischema-plan.md`'s "Migrating `@servable/server`'s own bundled protocols" section), fixing a `classLevelPermissions_` (trailing underscore, never read by any loader version) typo along the way for these four specifically — the same typo elsewhere in the codebase was deliberately left alone and filed as PEAKUB-233, since fixing it changes real, already-running permission enforcement and needs its own rollout decision.
+
+**If you ever touch `lib/adaptConfig/basic.js`'s protocols.local prepend, `@servable/cli`'s `loadServableConfig.js` has its own copy of this exact behavior** (resolving this package's installed path rather than importing it, to avoid depending on a real engine — see that file's own comment) and needs to stay in sync, or `servable schema build`'s committed artifact will silently drift from what a real boot resolves again, the same way it did before that fix.
+
+**Folder structure also modernized to the v1.1.0 loader convention** (these four had no `apiVersion` at all, defaulting to v1.0.0 — confirmed by tracing `domain/protocolLoader/v1.0.0.js` vs `v1.1.0.js`'s own hardcoded paths, not by inspection):
+- `manifest.json` → `index.json`, with `"apiVersion": "1.1.0"` added.
+- A protocol's own managed classes: `classes/<name>/class/{index.js,protocols.js}` → `models/<name>/{class.js,protocols.js}` (flat, no `class/` wrapper — matches `publishable`'s `models/publishableasset/`).
+- A protocol's contribution to a class it doesn't own: root-level `class/{index.js,protocols.js}` → `target/{class.js,protocols.js}`.
+- Data triggers on that target class: one merged `triggers/index.js` → one file per trigger under `target/triggers/` (`beforesave.js`/`aftersave.js`/`afterdelete.js`, default export, matching `publishable/target/triggers/`) — v1.1.0's loader still falls back to a merged `target/triggers/index.js` if no individual files are found, so this split wasn't strictly required, but matches the actual modern convention rather than just the minimum the loader accepts.
+- `servableconfigurable`'s `_afterInit/index.js` → a real `main.js` (`{ __servableType: 'main', afterInit: async (props) => {...} }`, matching `publishable/main.js`'s shape). **This one wasn't just a style change**: v1.0.0's loader looks for `afterInit/index.js` (no underscore) — `_afterInit/index.js` (underscore-prefixed) was never actually read by *any* loader version. `servableconfigurable`'s `afterInit` hook (which wires up config change listeners — see `lib/wire/`) had never once fired. Confirmed by instantiating the real `ProtocolLoaderV1_1_0` directly against each migrated protocol and calling `ownProtocols()`/`ownProtocolsClass()`/`triggers()`/`afterInit()`/`schemaRaw()` — all resolve correctly now, `afterInit` included.
+
+`schema plan --ci` after this restructuring reported no changes at all (folder layout isn't schema content), confirming the two migrations (schema format, then folder structure) were independent and neither broke the other.

@@ -1,5 +1,21 @@
 # @servable/server — Quick Reference
 
+## Schema (unischema)
+
+No commands here — schema is built/diffed/committed via `@servable/cli` (`servable schema build|plan|apply|contract`, see that package's own `QUICKREF.md`) in the consuming app, before deploy. What this package does is check the *result* at boot:
+
+```js
+// launch/start/schemaState/checkSchemaCompatibility.js - runs automatically inside launch()
+```
+
+- Throws if the committed `servable.schema.json` doesn't match what `buildSchema()` produces from current sources right now (forgot to run `schema build`/`apply`/`commit`).
+- Throws if this build's `compatibilityFloor` is lower than what's recorded in the database (`ServableSchemaState`) — a newer deploy already ran `schema contract` and removed something this build's code may still expect.
+- On success, persists this build's hash/floor to `ServableSchemaState` (raising the stored floor if this build's is higher, never lowering it).
+
+Both failures surface as a normal boot failure (`quit()`, same as any other fatal boot error) with a message naming the actual mismatch — nothing silent.
+
+See `CLAUDE.md` for what this replaced (the old version-comparison migration machinery) and why.
+
 ## Transactions
 
 `Servable.App.Transaction` is a taxonomy, not an implementation - this package (`server/src/domain/servable/transaction/index.js`) defines the *shape* every engine's own Transaction class is expected to conform to, and supplies a safe no-op fallback (throws a clear "not implemented" error on `commit()`/`rollback()`) for any engine that hasn't wired real support. `Servable.App.Transaction` is therefore never `undefined` - see `hydrate()` in `server/src/domain/servable/index.js`:
