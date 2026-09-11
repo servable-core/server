@@ -34,9 +34,10 @@ export default async ({
     const dockerNamespace = servableConfig.system?.docker?.namespace
     const projectName = sanitizePath.default(`${servableConfig.id}${dockerNamespace ? `-${dockerNamespace}` : ''}-${protocol.id}`).replaceAll('/', '-').toLowerCase()
     const executionDockerComposePath = targetDockerPath({
-      protocol
+      protocol,
+      servableConfig
     })
-    const executionDockerCompose = await existingCompose({ protocol })
+    const executionDockerCompose = await existingCompose({ protocol, servableConfig })
     let declaredDockerComposeExists = await protocol.loader.systemDockerComposeExists()
     let declaredDockerComposeDirPath = protocol.loader.systemDockerComposeDirPath()
     let declaredDockerCompose = null
@@ -184,9 +185,11 @@ export default async ({
       await updateTargetCompose({
         protocol,
         data: YAML.stringify(declaredDockerCompose.data.config),
+        servableConfig,
       })
       await copyDataIfNeeded({
         protocol,
+        servableConfig,
       })
 
       await compose.upAll({

@@ -5,9 +5,9 @@ import ensureDirectoryExistsSync from "../../../../utils/ensureDirectoryExistsSy
 export default async ({
   protocol,
   data,
+  servableConfig,
 }) => {
-  const targetPath = targetComposePath({ protocol })
+  const targetPath = targetComposePath({ protocol, servableConfig })
   ensureDirectoryExistsSync(targetPath)
   return fs.promises.writeFile(targetPath, data)
 }
-
