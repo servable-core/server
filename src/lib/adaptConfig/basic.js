@@ -141,7 +141,19 @@ export default ({ servableConfig }) => {
   servableConfig.envs["verbose"] = envOr(process.env.SERVABLE_VERBOSE, 1)
   servableConfig.envs["logLevel"] = envOr(process.env.SERVABLE_LOG_LEVEL, "verbose")
   servableConfig.envs["redisCacheUri"] = process.env.SERVABLE_REDIS_CACHE_URI
-  servableConfig.envs["utilsDatabaseURI"] = process.env.SERVABLE_UTILS_DATABASE_URI
+  // Preserve, don't overwrite: adaptConfig() runs a second time (launch/index.js, `live: true`)
+  // AFTER launchSystem() has already merged the dynamically-detected docker-compose connection
+  // details (servableConfig.envs = {...servableConfig.envs, ...payload}, launch/system/index.js)
+  // into servableConfig.envs - including the correct utilsDatabaseURI when docker had to
+  // reassign the declared port (getPortNear, e.g. two worktrees' stacks running at once). An
+  // unconditional assignment here silently clobbered that back to process.env.
+  // SERVABLE_UTILS_DATABASE_URI (undefined when that env var is deliberately left unset to let
+  // auto-detection handle it) on the second call, and Mongoose/the Mongo driver then fell back to
+  // its own default localhost:27017 - a real, confirmed boot failure whenever the declared port
+  // wasn't free. databaseURI (the main engine DB) never had this bug - its equivalent line in
+  // parse-server-unischema's setConfigurations/fillEnv.js already used this same
+  // preserve-if-already-set pattern.
+  servableConfig.envs["utilsDatabaseURI"] = envOr(servableConfig.envs["utilsDatabaseURI"], process.env.SERVABLE_UTILS_DATABASE_URI)
 
   servableConfig.adaptedBasic = true
 }
