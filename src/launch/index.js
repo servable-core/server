@@ -173,7 +173,13 @@ export default async ({ servableConfig, engine }) => {
     // Servable.Console.log("[Servable]", '--------Config:', i)
     printEnd()
 
-    Servable.App.Route.define({
+    // Route.define is async - it MUST be awaited here. Left un-awaited, any exception it throws
+    // (e.g. from cache/rate-limiter construction) becomes a silent unhandled promise rejection
+    // instead of hitting the catch block below, so the health-check route would simply never
+    // register with zero log output explaining why - indistinguishable from a working boot until
+    // kube's liveness/readiness probes (which hit exactly this path) start failing. See
+    // CLAUDE.md.
+    await Servable.App.Route.define({
       method: "get",
       cache: {
         configurations: [
@@ -199,22 +205,28 @@ export default async ({ servableConfig, engine }) => {
     })
   } catch (e) {
     console.error('[SERVABLE]', 'launch', e)
-    Servable.App.Route.define({
-      method: "get",
-      cache: {
-        configurations: [
-          {
-            storage: "inMemory",
-            window: 10
-          }
-        ]
-      },
-      path: '/health-check',
-      handler: async (_, response) => {
-        console.log('health check pinged: error')
-        response.status(500).send('Server failed')
-      }
-    })
+    try {
+      // Also awaited, and wrapped so a failure registering even this last-resort fallback route
+      // is at least logged instead of becoming a second, equally invisible unhandled rejection.
+      await Servable.App.Route.define({
+        method: "get",
+        cache: {
+          configurations: [
+            {
+              storage: "inMemory",
+              window: 10
+            }
+          ]
+        },
+        path: '/health-check',
+        handler: async (_, response) => {
+          console.log('health check pinged: error')
+          response.status(500).send('Server failed')
+        }
+      })
+    } catch (fallbackError) {
+      console.error('[SERVABLE]', 'launch', 'failed to register fallback health-check route', fallbackError)
+    }
   }
   finally {
     // const diff = heapDiff.end()
