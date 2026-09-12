@@ -1,9 +1,11 @@
 import * as compose from 'docker-compose'
 import YAML from 'yaml'
+import fs from 'fs'
 import adaptServices from './adaptServices/index.js'
 import adaptServicesPorts from './adaptServicesPorts/index.js'
 import updateTargetCompose from './lib/updateTargetCompose.js'
 import targetDockerPath from './lib/targetDockerPath.js'
+import targetDockerComposePath from './lib/targetDockerComposePath.js'
 import existingCompose from './lib/existingCompose.js'
 import adaptForConsumption from './attachToProtocol/index.js'
 import copyDataIfNeeded from './lib/copyDataIfNeeded.js'
@@ -192,16 +194,29 @@ export default async ({
         servableConfig,
       })
 
-      await compose.upAll({
-        cwd: executionDockerComposePath,
-        composeOptions: [
-          ['--project-name', projectName],
-          // TODO: stop orphans['--remove-orphans']
-        ],
-        callback: chunk => {
-          Servable.Console.log("[Servable]", `Docker compose up job in progres for ${protocol.id}: `, chunk.toString())
-        }
-      })
+      try {
+        await compose.upAll({
+          cwd: executionDockerComposePath,
+          composeOptions: [
+            ['--project-name', projectName],
+            // TODO: stop orphans['--remove-orphans']
+          ],
+          callback: chunk => {
+            Servable.Console.log("[Servable]", `Docker compose up job in progres for ${protocol.id}: `, chunk.toString())
+          }
+        })
+      } catch (e) {
+        // The target compose file (with this run's fingerprint) was already written above, since
+        // `docker-compose up` needs a real file at executionDockerComposePath to run against. If
+        // upAll itself fails (e.g. a name conflict with an unmanaged container), that fingerprint
+        // is now indistinguishable from a successful run - existingCompose()'s fingerprint check
+        // on the NEXT launch would see it as "already applied" and skip upAll again, permanently
+        // masking the failure. Remove it so the next attempt sees no matching execution config and
+        // genuinely retries instead of silently no-op'ing forever.
+        const targetPath = targetDockerComposePath({ protocol, servableConfig })
+        await fs.promises.rm(targetPath, { force: true })
+        throw e
+      }
     }
 
     if (declaredDockerCompose.data.config.services) {
