@@ -59,7 +59,7 @@
     "trailingComma": "es5"
   },
   "dependencies": {
-    "@servable/tools": "unischema",
+    "@servable/tools": "^2.0.0",
     "agenda": "*",
     "axios": "^1.7.2",
     "cookie": "^1.0.2",
