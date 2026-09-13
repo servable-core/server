@@ -34,17 +34,38 @@ export default async ({
     throw ({ message: 'No refresh token provided', code: 401 })
   }
 
+  const isProd = process.env.NODE_ENV === 'production'
+  // Shared by the rotation's own Set-Cookie below and by the clearCookie calls that reject a
+  // token which can never succeed again. A browser only honors clearCookie when every option
+  // except expires/maxAge matches what set it, so these must not drift apart - the same trap
+  // backend/main's own removeSessionToken documents for the session cookie.
+  const refreshCookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'None' : 'Lax',
+    path: '/',
+    domain: cookieDomain,
+  }
+
   const session = await new Servable.App.Query('_Session')
     .equalTo('refreshTokenHash', hashToken(refreshToken))
     .include('user')
     .first({ useMasterKey: true })
 
   if (!session) {
+    // Deliberately NOT cleared here, unlike the expiry and device-mismatch cases below. A hash
+    // matching no session is also exactly what the LOSING side of a concurrent rotation sees:
+    // two tabs refreshing at once, the winner already rotated the hash and Set-Cookie'd the new
+    // token, so clearing here would let the loser delete the winner's perfectly good fresh
+    // cookie. Rotation reuse-detection depends on this staying a plain rejection.
     throw ({ message: 'Invalid refresh token', code: 401 })
   }
 
   const expiresAt = session.get('refreshTokenExpiresAt')
   if (!expiresAt || new Date() > expiresAt) {
+    // Time-based and irreversible, so there's no concurrent-rotation race to lose by clearing -
+    // and clearing is what stops the client replaying a dead token on every later page load.
+    response.clearCookie('refresh_token', refreshCookieOptions)
     throw ({ message: 'Refresh token expired', code: 401 })
   }
 
@@ -60,6 +81,25 @@ export default async ({
     // check rather than locking out a legitimate user over incomplete data. Real theft-of-just-
     // the-cookie cases (the scenario this defends) always have both values.
     if (boundInstallationId && installationId && boundInstallationId !== installationId) {
+      // createdWith is the load-bearing field when diagnosing one of these: installationId
+      // reaches _Session by a different route per login path (parse-server's own
+      // X-Parse-Installation-Id header for password login/signup, an explicit session.set for
+      // emailCode - see backend/main's redeemlogincode.js), so knowing which path minted this
+      // session is what separates a real stolen-cookie replay from a binding that was never
+      // written consistently to begin with.
+      console.warn('[Servable Auth] refresh rejected: device mismatch', JSON.stringify({
+        userId: user.id,
+        sessionId: session.id,
+        boundInstallationId,
+        requestInstallationId: installationId,
+        createdWith: session.get('createdWith') || null,
+      }))
+      // Cleared rather than left for the client to replay: this token is bound to an
+      // installationId the caller has just demonstrated it will not present, so every later page
+      // load would otherwise repeat this same rejected call forever. This does NOT sign the
+      // caller out - the legacy session-token cookie is resolved independently (userResolver.js)
+      // and is untouched here.
+      response.clearCookie('refresh_token', refreshCookieOptions)
       throw ({ message: 'Refresh token is bound to a different device', code: 401 })
     }
   }
@@ -80,16 +120,11 @@ export default async ({
     secret: authConfig.jwtSecret
   })
 
-  const isProd = process.env.NODE_ENV === 'production'
   response.cookie(
     'refresh_token',
     newRefreshToken,
     {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'None' : 'Lax',
-      path: '/',
-      domain: cookieDomain,
+      ...refreshCookieOptions,
       maxAge: newRefreshTokenTTL * 1000,
     }
   )

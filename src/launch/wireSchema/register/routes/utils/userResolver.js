@@ -49,6 +49,26 @@ export default async ({
       return null
     }
 
+    // Same device check refreshSessionTokens.js applies to the refresh token, extended to this
+    // path - without it the legacy cookie is the way AROUND device binding: a caller holding it
+    // never touches the refresh endpoint, so the binding there never sees them. Fails open when
+    // either side is missing, exactly like the refresh path, so partner API callers sending the
+    // token as a bare header (see getSessionToken below) and older sessions predating
+    // installationId keep working.
+    if (authConfig.legacySessionDeviceBindingEnabled) {
+      const boundInstallationId = session.get('installationId')
+      const installationId = request.headers?.['x-servable-installation-id']
+      if (boundInstallationId && installationId && boundInstallationId !== installationId) {
+        console.warn('[Servable Auth] session rejected: device mismatch', JSON.stringify({
+          sessionId: session.id,
+          boundInstallationId,
+          requestInstallationId: installationId,
+          createdWith: session.get('createdWith') || null,
+        }))
+        return null
+      }
+    }
+
     const user = session.get('user')
     if (!user) {
       return null
