@@ -32,6 +32,22 @@ export default () => ({
     envOr(process.env.AUTH_LEGACY_SESSION_DEVICE_BINDING, '1') !== '0',
   // How long a step-up confirmation (password re-entry) stays valid before a requireStepUp
   // route demands it again, regardless of how fresh the access/refresh tokens themselves are.
+  // Concurrent-refresh leeway. Rotation is a read-then-write with no compare-and-swap behind it
+  // (Parse exposes none, and Servable.App.Transaction needs a replica set, so a standalone-Mongo
+  // deployment could not rely on one anyway). Two refreshes presenting the SAME token therefore
+  // both used to succeed and each issue a DIFFERENT new token, while _Session kept only the last
+  // one written - leaving the browser holding a token the server had already forgotten, and the
+  // next refresh failing with "Invalid refresh token" on a session that was never actually
+  // compromised. Measured in a real browser, not hypothesised.
+  //
+  // Within this window the previously-rotated token still authenticates, but ONLY to mint an
+  // access token: it does not rotate again and sends no Set-Cookie, so exactly one refresh token
+  // is ever in flight per rotation and the cookie cannot diverge from the stored hash. Keep it
+  // short - it is the window in which a genuinely stolen token still works. Beyond it, replay is
+  // rejected exactly as before, so reuse detection is preserved for every realistic theft
+  // timeline. Set to 0 to disable the grace path entirely and restore strict single-use.
+  refreshTokenRotationLeewaySeconds:
+    parseInt(envOr(process.env.AUTH_REFRESH_TOKEN_ROTATION_LEEWAY_SECONDS, 30), 10), // 30s
   stepUpFreshnessSeconds: parseInt(envOr(process.env.AUTH_STEP_UP_FRESHNESS_SECONDS, 300), 10), // 5 min
 })
 

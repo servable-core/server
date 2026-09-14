@@ -1,4 +1,4 @@
-import { generateToken, hashToken, createAccessToken } from '../../../lib/auth/tokenRotation.js'
+import { deriveRotatedToken, hashToken, createAccessToken } from '../../../lib/auth/tokenRotation.js'
 import resolveAuthConfig, { getRefreshTokenTTL } from '../../../lib/auth/authConfig.js'
 
 // Attached onto Servable.App.User (= Parse.User) alongside mintSessionTokens - see that file's
@@ -47,10 +47,35 @@ export default async ({
     domain: cookieDomain,
   }
 
-  const session = await new Servable.App.Query('_Session')
-    .equalTo('refreshTokenHash', hashToken(refreshToken))
+  const presentedHash = hashToken(refreshToken)
+
+  let session = await new Servable.App.Query('_Session')
+    .equalTo('refreshTokenHash', presentedHash)
     .include('user')
     .first({ useMasterKey: true })
+
+  // Nothing matched the CURRENT hash - before rejecting, check whether this is the token the
+  // most recent rotation just consumed, still inside its leeway window. That is the ordinary
+  // shape of two refreshes racing from one browser (a page load whose mount effect refreshes
+  // while an in-flight request refreshes too, or simply a second tab), not an attack: this
+  // rotation is a read-then-write with no compare-and-swap available, so without the window both
+  // callers rotate, each issues a different token, and the browser is left holding whichever
+  // Set-Cookie arrived last while _Session kept whichever write landed last - two independent
+  // coin flips that disagree half the time. See authConfig.js's own comment for the full
+  // rationale and the security trade being made.
+  let isGraceReplay = false
+  if (!session && authConfig.refreshTokenRotationLeewaySeconds > 0) {
+    const rotatedFrom = await new Servable.App.Query('_Session')
+      .equalTo('previousRefreshTokenHash', presentedHash)
+      .include('user')
+      .first({ useMasterKey: true })
+
+    const graceUntil = rotatedFrom?.get('previousRefreshTokenGraceUntil')
+    if (rotatedFrom && graceUntil && new Date() <= graceUntil) {
+      session = rotatedFrom
+      isGraceReplay = true
+    }
+  }
 
   if (!session) {
     // Deliberately NOT cleared here, unlike the expiry and device-mismatch cases below. A hash
@@ -104,13 +129,46 @@ export default async ({
     }
   }
 
+  // Inside the leeway window: mint the access token the caller actually came for, and stop.
+  // Deliberately no rotation and no Set-Cookie - the rotation this token was consumed by has
+  // already issued the one live refresh token, and writing a second one here is precisely the
+  // divergence this path exists to prevent. Returning 'exists' rather than a raw token is also
+  // what keeps the custom-domain proxy from re-minting its own copy (it skips any body whose
+  // refreshToken is 'exists'), so the caller's existing cookie is left untouched there too.
+  if (isGraceReplay) {
+    const accessToken = createAccessToken({
+      userId: user.id,
+      sessionId: session.id,
+      expiresAt: Date.now() + (authConfig.accessTokenTTL * 1000),
+      secret: authConfig.jwtSecret
+    })
+
+    return {
+      accessToken,
+      refreshToken: 'exists',
+      expiresIn: authConfig.accessTokenTTL,
+      tokenType: 'Bearer',
+      // The live token's own remaining life, not a fresh full TTL - nothing was rotated, so
+      // reporting a full window here would let a caller size a cookie past the real expiry.
+      refreshTokenExpiresIn: Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000)),
+    }
+  }
+
   const rememberMe = session.get('rememberMe') || false
-  const newRefreshToken = generateToken()
+  const newRefreshToken = deriveRotatedToken(refreshToken, authConfig.jwtSecret)
   const newRefreshTokenTTL = getRefreshTokenTTL(rememberMe, authConfig)
   const newRefreshTokenExpiresAt = new Date(Date.now() + newRefreshTokenTTL * 1000)
 
   session.set('refreshTokenHash', hashToken(newRefreshToken))
   session.set('refreshTokenExpiresAt', newRefreshTokenExpiresAt)
+  // The token just consumed stays usable for a short, access-token-only grace period, so a
+  // concurrent caller still presenting it converges on this same rotation instead of starting a
+  // competing one. Stored as a hash like the live one - the raw value is never persisted.
+  session.set('previousRefreshTokenHash', presentedHash)
+  session.set(
+    'previousRefreshTokenGraceUntil',
+    new Date(Date.now() + (authConfig.refreshTokenRotationLeewaySeconds * 1000))
+  )
   await session.save(null, { useMasterKey: true })
 
   const accessToken = createAccessToken({

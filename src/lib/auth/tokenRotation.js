@@ -9,6 +9,25 @@ export const generateToken = () => crypto.randomBytes(32).toString('hex')
 
 export const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex')
 
+// The rotated token is DERIVED from the one being consumed, not freshly random. Two refreshes
+// racing with the same token therefore compute the same successor and converge, instead of each
+// minting a different one and leaving the browser holding a token _Session never stored (the
+// grace window in refreshSessionTokens.js only rescues a caller arriving AFTER a rotation
+// committed - simultaneous callers both match the live hash and both rotate, so randomness here
+// is what actually makes them diverge).
+//
+// Unpredictable without the secret: an attacker holding a refresh token still cannot compute its
+// successor, and must call the endpoint to rotate exactly as before. An attacker who has the
+// secret can forge access tokens outright, so chain-predictability adds nothing there. The one
+// property given up is divergence-on-theft - a thief and the legitimate client rotating the same
+// token now converge on one token rather than locking each other out. That lockout was never
+// alarmed on, and it surfaced as the real user being signed out; replay OUTSIDE the grace window
+// is still rejected identically, so reuse detection itself is unchanged.
+export const deriveRotatedToken = (currentToken, secret) => crypto
+  .createHmac('sha256', secret)
+  .update(`servable:refresh-rotation:${currentToken}`)
+  .digest('hex')
+
 export const validateRefreshToken = (providedToken, storedHash) => {
   if (!providedToken || !storedHash) return false
   return hashToken(providedToken) === storedHash
