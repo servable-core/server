@@ -1795,10 +1795,10 @@
     lodash-es "^4.17.21"
     read-pkg-up "^11.0.0"
 
-"@servable/tools@unischema":
-  version "2.0.0-unischema.1"
-  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-2.0.0-unischema.1.tgz#f0a9d817ffe114899a22a6e4ff4f5856d3fc6f07"
-  integrity sha512-GOGNb71EihqZ+yWvJYkv4gOBUakq7OhfyZy8JMP+b8+Q/GocD4XNBQAIg/xhq8PfC/vuddq+iIGSBQPhfHGPQA==
+"@servable/tools@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@servable/tools/-/tools-2.0.0.tgz#a9eb31de592180bfef41929fe0f85d5469f164b3"
+  integrity sha512-5z3ZW4HAgoYzulEWmxTD22ydlzH0pVdUAjfs9Rz2PEDSq1TVpwJDLUgJJSLftmzYnH+klMzI7s1BEjTtTweQrw==
   dependencies:
     fast-glob "^3.3.2"
     fs-extra "^11.2.0"
