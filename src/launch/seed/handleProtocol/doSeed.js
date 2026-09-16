@@ -1,7 +1,7 @@
 import manual from "./manual/index.js"
 import auto from "./auto/index.js"
 
-export default async ({ protocol, operationProps, configuration }) => {
+export default async ({ protocol, operationProps, stateStore }) => {
 
   const { mode } = protocol
 
@@ -11,7 +11,7 @@ export default async ({ protocol, operationProps, configuration }) => {
       await manual({ protocol, operationProps })
     } break
     case 'auto': {
-      await auto({ protocol, configuration })
+      await auto({ protocol, stateStore })
     } break
   }
 }

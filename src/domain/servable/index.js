@@ -1,4 +1,3 @@
-// import Agenda from "agenda"
 import Express from './express/index.js'
 import Services from './services/index.js'
 import _LiveQueries from './livequeries/index.js'
@@ -40,9 +39,6 @@ export default class Servable extends BaseClass {
   get schema() { return this._schema }
   set schema(value) { this._schema = value }
 
-  get Agenda() { return this._agenda }
-  set Agenda(value) { this._agenda = value }
-
   get Config() { return this._config }
   set Config(value) { this._config = value }
 
@@ -62,7 +58,6 @@ export default class Servable extends BaseClass {
     this._servableConfig = servableConfig
     this._services = new Services()
     this._liveQueries = new _LiveQueries()
-    // this._agenda = new Agenda()
     this._operations = new _Operations({
       servableConfig,
       engine

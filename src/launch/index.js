@@ -92,7 +92,7 @@ export default async ({ servableConfig, engine }) => {
 
     // Servable.Console.log("[Servable]", `Launch > started the parse server`)
 
-    const { schema, server, configuration } = serverStruct
+    const { schema, server, configuration, stateStore } = serverStruct
 
 
     if (configuration.params.skipWiring) {
@@ -132,7 +132,7 @@ export default async ({ servableConfig, engine }) => {
       schema,
       app,
       httpServer,
-      configuration,
+      stateStore,
       engine,
       operationProps: {
         server,
@@ -145,7 +145,7 @@ export default async ({ servableConfig, engine }) => {
 
     await config({
       schema,
-      configuration,
+      stateStore,
     })
 
     await afterInit({

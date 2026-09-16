@@ -5,7 +5,7 @@ const perform = async ({
   items,
   cache,
   operationProps,
-  configuration }) => {
+  stateStore }) => {
 
   const { metadata, } = item
   if (cache[item.id]) {
@@ -13,7 +13,7 @@ const perform = async ({
   }
 
   if (!metadata || !metadata.dependencies || !metadata.dependencies.length) {
-    await doPerform({ protocol: item, operationProps, configuration })
+    await doPerform({ protocol: item, operationProps, stateStore })
     cache[item.id] = true
     return
   }
@@ -36,13 +36,13 @@ const perform = async ({
       items: items,
       cache,
       operationProps,
-      configuration,
+      stateStore,
       item: candidate
     })
 
   }
 
-  await doPerform({ protocol: item, operationProps, configuration })
+  await doPerform({ protocol: item, operationProps, stateStore })
   cache[item.id] = true
 }
 

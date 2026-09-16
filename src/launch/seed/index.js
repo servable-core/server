@@ -2,7 +2,7 @@ import protocolCandidates from "./protocolCandidates/index.js"
 import handleProtocol from './handleProtocol/index.js'
 import _ from 'underscore'
 
-export default async ({ schema, configuration, operationProps }) => {
+export default async ({ schema, stateStore, operationProps }) => {
   const {
     protocols
   } = schema
@@ -22,7 +22,7 @@ export default async ({ schema, configuration, operationProps }) => {
       items: candidates,
       item: candidate,
       cache,
-      configuration
+      stateStore
     })
   }
 

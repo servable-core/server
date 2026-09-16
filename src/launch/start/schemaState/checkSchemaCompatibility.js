@@ -1,7 +1,5 @@
 import { normalizeArtifact } from '@servable/tools'
 import readCommittedArtifact from './readCommittedArtifact.js'
-import stateForConfiguration from '../../../lib/utilsDatabase/classes/schemaState/functions/stateForConfiguration.js'
-import recordAppliedArtifact from '../../../lib/utilsDatabase/classes/schemaState/functions/recordAppliedArtifact.js'
 
 // Replaces the entire migrate/qualify/MigrationStateEnum machinery - see
 // .docs/technical/unischema-plan.md. Two independent checks, either of which can stop boot:
@@ -14,18 +12,17 @@ import recordAppliedArtifact from '../../../lib/utilsDatabase/classes/schemaStat
 //
 // 2. Compatibility floor (decisions #1/#7, the actual answer to "pod A on schema n, pod B
 //    migrates to n+1, A is left with a mismatched DB"): refuse to boot if THIS pod's own
-//    artifact carries a lower compatibilityFloor than what's already recorded in
-//    ServableSchemaState - i.e. some other, newer deploy already ran `schema contract` and
-//    removed something this pod's code may still expect to exist. Purely additive deploys never
-//    move the floor, so this never fires for the overwhelming majority of deploys - it only
-//    bites the one case it exists for.
+//    artifact carries a lower compatibilityFloor than what's already recorded in the engine's
+//    state store (utilless - see lib/stateStore/index.js) - i.e. some other, newer deploy already
+//    ran `schema contract` and removed something this pod's code may still expect to exist.
+//    Purely additive deploys never move the floor, so this never fires for the overwhelming
+//    majority of deploys - it only bites the one case it exists for.
 //
 // `schemaBuildResult` is launch/index.js's own buildSchema() output, passed straight through -
 // normalizeArtifact() is pure (see schema/artifact/index.js), so this never re-runs buildSchema
 // a second time just to check drift.
-export default async ({ schemaBuildResult, servableConfig }) => {
+export default async ({ schemaBuildResult, servableConfig, stateStore }) => {
   const { configuration } = servableConfig
-  const databaseURI = configuration?.lock?.databaseURI
 
   const committed = readCommittedArtifact()
   if (!committed) {
@@ -44,7 +41,7 @@ export default async ({ schemaBuildResult, servableConfig }) => {
   }
 
   const committedFloor = committed.compatibilityFloor || 0
-  const stored = await stateForConfiguration({ databaseURI, key: configuration.key })
+  const stored = await stateStore.schemaState.get({ key: configuration.key })
   const storedFloor = stored?.compatibilityFloor || 0
 
   if (committedFloor < storedFloor) {
@@ -57,8 +54,9 @@ export default async ({ schemaBuildResult, servableConfig }) => {
     )
   }
 
-  await recordAppliedArtifact({
-    databaseURI,
+  // The store raises the floor atomically and never lowers it - see the contract in
+  // lib/stateStore/index.js for why that can't be a read-then-write here.
+  await stateStore.schemaState.recordApplied({
     key: configuration.key,
     artifactHash: committed.hash,
     compatibilityFloor: committedFloor,

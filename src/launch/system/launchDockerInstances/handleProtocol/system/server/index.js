@@ -29,7 +29,6 @@ export default {
     }
 
     return {
-      // utilsDatabaseURI: envOr(process.env.SERVABLE_UTILS_DATABASE_URI, configSERVABLE_UTILS_DATABASE_URI),
       redisCacheUri: envOr(process.env.SERVABLE_REDIS_CACHE_URI, configSERVABLE_REDIS_CACHE_URI),
     }
   }
