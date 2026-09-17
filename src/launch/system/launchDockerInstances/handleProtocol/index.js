@@ -1,3 +1,4 @@
+// @ts-nocheck - lucide (PEAKUB DX initiative): local-dev docker-compose orchestration internals, not part of this package's public surface (only launch() is exported). Deferred rather than annotated - a future pass should type the config/protocol handoff shapes here properly.
 import * as compose from 'docker-compose'
 import YAML from 'yaml'
 import fs from 'fs'

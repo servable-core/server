@@ -63,6 +63,7 @@ export default class ServableTransaction {
     }
   }
 
+  /** @param {{ context?: Record<string, any>, [key: string]: any }} [options] */
   toWriteOptions(options = {}) {
     this._assertOpen()
     const _options = (options && typeof options === 'object') ? options : {}

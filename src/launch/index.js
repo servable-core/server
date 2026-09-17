@@ -59,9 +59,13 @@ export default async ({ servableConfig, engine }) => {
       engine
     })
 
+    // `payload: systemPayload` was dead here (found via checkJs, lucide/PEAKUB DX initiative):
+    // neither adaptConfig() nor basic() reads a `payload` property - whatever merges
+    // launchSystem()'s dynamically-detected connection details into servableConfig.envs
+    // happens inside launchSystem() itself, not here. Removed rather than kept as a
+    // misleading no-op argument.
     adaptConfig({
       servableConfig,
-      payload: systemPayload,
       live: true,
       engine
     })
@@ -101,7 +105,10 @@ export default async ({ servableConfig, engine }) => {
     }
 
     Servable.publicUrl = configuration.config.parse.publicServerURL
-    Servable.Console.log("[Servable]", `Launch > set public server url (with mount)`, Servable.publicServerURL)
+    // Was `Servable.publicServerURL` - found via checkJs (lucide, PEAKUB DX initiative): that
+    // property is never set anywhere, only `Servable.publicUrl` (set on the line above) is -
+    // this log line has always printed `undefined` instead of the URL it claims to report.
+    Servable.Console.log("[Servable]", `Launch > set public server url (with mount)`, Servable.publicUrl)
     /////////////////////////////
 
     await beforeInit({
@@ -127,13 +134,12 @@ export default async ({ servableConfig, engine }) => {
       servableConfig
     })
 
+    // server/app/httpServer/engine were dead top-level properties here (found via checkJs,
+    // lucide/PEAKUB DX initiative): seed() only ever reads schema/stateStore/operationProps -
+    // everything a seed entry actually needs is already threaded through operationProps below.
     await seed({
-      server,
       schema,
-      app,
-      httpServer,
       stateStore,
-      engine,
       operationProps: {
         server,
         schema,

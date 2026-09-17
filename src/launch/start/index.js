@@ -11,6 +11,11 @@ import boot from './boot/index.js'
 // booting, rather than watching for another pod's migration after the fact.
 export default async ({ servableConfig, app, schema, engine }) => {
 
+  // Typed `any` rather than left to infer `null` - `hd` is only ever assigned via the
+  // commented-out `new memwatch.HeapDiff()` below, so a precise type would narrow `if (hd)`
+  // to unreachable and error on `.end()` inside it. This whole branch is dead until that
+  // feature comes back (found via checkJs, lucide/PEAKUB DX initiative).
+  /** @type {any} */
   let hd = null
   let launchedServer = null
 

@@ -48,8 +48,12 @@ export default class Servable extends BaseClass {
   get engine() { return this._engine }
   set engine(value) { this._engine = value }
 
-  constructor(props) {
-    super(props)
+  constructor() {
+    // Was `constructor(props) { super(props) ... }` - found via checkJs (lucide, PEAKUB DX
+    // initiative): the base class's own constructor takes no parameter at all, and this
+    // class's only real call site (`new ServableClass()` in launch/index.js) never passed one
+    // either. Dropped rather than kept as a misleading no-op parameter.
+    super()
     this.App = {}
   }
 
@@ -58,10 +62,9 @@ export default class Servable extends BaseClass {
     this._servableConfig = servableConfig
     this._services = new Services()
     this._liveQueries = new _LiveQueries()
-    this._operations = new _Operations({
-      servableConfig,
-      engine
-    })
+    // Operations' constructor takes no arguments (found via checkJs, lucide/PEAKUB DX
+    // initiative) - servableConfig/engine were dead here, never read.
+    this._operations = new _Operations()
     this._express = new Express()
     this._process = {}
     this.engine = engine

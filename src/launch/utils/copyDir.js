@@ -11,6 +11,9 @@ const copyFileSync = (source, target) => {
         }
     }
 
+    // @ts-expect-error - a real, standard Node pattern (readFileSync's Buffer straight into
+    // writeFileSync); this @types/node version's writeFileSync signature is just stricter than
+    // Buffer structurally satisfies (a SharedArrayBuffer-generics mismatch), not a real bug.
     fs.writeFileSync(targetFile, fs.readFileSync(source));
 }
 

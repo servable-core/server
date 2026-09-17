@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "types",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmitOnError": false
+  },
+  "include": ["src/**/*.js", "global.d.ts"],
+  "exclude": [
+    "node_modules",
+    "types",
+    "tests",
+    "**/*.test.js",
+    "src/_archive/**",
+    "src/launch/system/launchDockerInstances/**",
+    "src/launch/wireSchema/register/**"
+  ]
+}

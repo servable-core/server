@@ -6,7 +6,10 @@ export const afterDelete = async ({ request }) => {
     }
 
     const items = object.disposableFromQueryOrphansQueries()
-    await Promise.all(items.map(child => handleItem({ object, child })))
+    // Renamed the local var (was `child`) to match handleItem()'s real `query` parameter name -
+    // found via checkJs (lucide, PEAKUB DX initiative). No behavior change: handleItem()'s body
+    // is an unfinished #TODO stub below and doesn't read this argument either way yet.
+    await Promise.all(items.map(query => handleItem({ object, query })))
 }
 
 export const beforeSaveValidator = {

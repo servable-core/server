@@ -1,3 +1,4 @@
+// @ts-nocheck - lucide (PEAKUB DX initiative): wireSchema's internal protocol->engine registration glue, not part of this package's public surface (only launch() is exported). Deferred rather than annotated - a future pass should type the handoff shapes between wireSchema and each register/* module properly.
 import registerCloudCode from './cloudCode/index.js'
 import registerRoutes from './routes/index.js'
 import registerJobs from './jobs/index.js'
