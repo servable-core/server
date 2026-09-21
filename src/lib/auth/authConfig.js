@@ -41,13 +41,32 @@ export default () => ({
   // compromised. Measured in a real browser, not hypothesised.
   //
   // Within this window the previously-rotated token still authenticates, but ONLY to mint an
-  // access token: it does not rotate again and sends no Set-Cookie, so exactly one refresh token
-  // is ever in flight per rotation and the cookie cannot diverge from the stored hash. Keep it
-  // short - it is the window in which a genuinely stolen token still works. Beyond it, replay is
-  // rejected exactly as before, so reuse detection is preserved for every realistic theft
-  // timeline. Set to 0 to disable the grace path entirely and restore strict single-use.
+  // access token and re-deliver the live refresh token that rotation already issued (a
+  // deterministic HMAC of the consumed one, so the same value - see refreshSessionTokens.js): it
+  // never rotates again, so exactly one refresh token is ever in flight per rotation and the
+  // cookie cannot diverge from the stored hash. The re-delivery is also what repairs a rotation
+  // whose response never reached the browser (reload mid-refresh). Only used when
+  // refreshTokenRotationUntilUsed below is off; it is the window in which a genuinely stolen
+  // consumed token still works. Set to 0 to disable the grace path entirely and restore strict
+  // single-use, in either mode.
   refreshTokenRotationLeewaySeconds:
     parseInt(envOr(process.env.AUTH_REFRESH_TOKEN_ROTATION_LEEWAY_SECONDS, 30), 10), // 30s
+  // Keep the consumed token accepted (access token + re-delivery of its successor, never a new
+  // rotation) until that successor is first used, instead of for a fixed leeway - bounded by the
+  // successor's own expiry. A fixed window only rescues a lost rotation response if the browser
+  // comes back within it; a reload does, but a tab closed mid-refresh, a laptop lid shut, or a
+  // network drop during a navigation does not, and that browser was stranded for good
+  // (PEAKUB-391). The next rotation overwrites the previous hash, so "until used" needs no extra
+  // bookkeeping: the moment the successor is presented, the consumed token matches nothing.
+  //
+  // The trade: a replayed consumed token now works until the legitimate client's next refresh
+  // (normally its next page load, but possibly days away) instead of for 30s, and the replayer
+  // converges on the same live token rather than being locked out - the same convergence
+  // deriveRotatedToken already accepts for simultaneous refreshes (see tokenRotation.js).
+  // Device binding still applies to every replay. AUTH_REFRESH_TOKEN_ROTATION_UNTIL_USED=0 is the
+  // one-line rollback to the fixed leeway above.
+  refreshTokenRotationUntilUsed:
+    envOr(process.env.AUTH_REFRESH_TOKEN_ROTATION_UNTIL_USED, '1') !== '0',
   stepUpFreshnessSeconds: parseInt(envOr(process.env.AUTH_STEP_UP_FRESHNESS_SECONDS, 300), 10), // 5 min
 })
 

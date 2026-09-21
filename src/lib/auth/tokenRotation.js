@@ -28,6 +28,18 @@ export const deriveRotatedToken = (currentToken, secret) => crypto
   .update(`servable:refresh-rotation:${currentToken}`)
   .digest('hex')
 
+// The refresh token rebuilt for a live session whose own refresh token fell out of sync (see
+// refreshSessionTokens.js's rebuildFromSession). Deterministic for the same reason rotation is:
+// two tabs presenting the same stale cookie at once must rebuild the SAME token, not race two
+// different ones into the cookie and the stored hash. The stored hash it replaces is part of the
+// input so a LATER rebuild of the same session never re-issues a value that was already handed
+// out once and has since been rotated away - no resurrecting an old token. Its own prefix keeps
+// it from ever colliding with a rotated token.
+export const deriveRebuiltToken = (sessionToken, presentedToken, replacedHash, secret) => crypto
+  .createHmac('sha256', secret)
+  .update(`servable:refresh-rebuild:${sessionToken}:${presentedToken}:${replacedHash}`)
+  .digest('hex')
+
 export const validateRefreshToken = (providedToken, storedHash) => {
   if (!providedToken || !storedHash) return false
   return hashToken(providedToken) === storedHash

@@ -49,6 +49,9 @@ export default async ({
   session.set('refreshTokenHash', hashToken(refreshToken))
   session.set('refreshTokenExpiresAt', refreshTokenExpiresAt)
   session.set('rememberMe', rememberMe)
+  // A fresh mint starts a new chain: no consumed token from an earlier one keeps its grace.
+  session.unset('previousRefreshTokenHash')
+  session.unset('previousRefreshTokenGraceUntil')
   await session.save(null, { useMasterKey: true })
 
   const accessToken = createAccessToken({
