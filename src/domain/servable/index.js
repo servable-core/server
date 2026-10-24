@@ -7,6 +7,9 @@ import mintSessionTokens from './user/mintSessionTokens.js'
 import refreshSessionTokens from './user/refreshSessionTokens.js'
 import checkStepUpFreshness from './user/checkStepUpFreshness.js'
 import confirmStepUp from './user/confirmStepUp.js'
+import { wrapRouteDefine } from '../../lib/requestScope/wrapRouteDefinition.js'
+import RequestScope from '../../lib/requestScope/index.js'
+import CacheAside from '../../lib/cacheAside/index.js'
 import { Domain } from '@servable/tools'
 // import { Domain } from '../../../../tools/src/index.js'
 
@@ -23,6 +26,17 @@ export default class Servable extends BaseClass {
 
   get Process() { return this._process }
   set Process(value) { this._process = value }
+
+  // Per-request memo and batching, see lib/requestScope. Not retained beyond one request.
+  get RequestScope() { return RequestScope }
+  requestMemo(options) { return RequestScope.requestMemo(options) }
+  createBatchLoader(options) { return RequestScope.createBatchLoader(options) }
+
+  // Cross-request fact cache in Redis, fixed TTL, fail-open, see lib/cacheAside. The app registers
+  // its Redis client once at boot; without one, every call simply loads from the source.
+  registerCacheClient(getClient, options) { return CacheAside.registerCacheClient(getClient, options) }
+  cacheAside(options) { return CacheAside.cacheAside(options) }
+  forgetCachedKey(key) { return CacheAside.forgetCachedKey(key) }
 
   get Services() { return this._services }
   set Services(value) { this._services = value }
@@ -95,6 +109,9 @@ export default class Servable extends BaseClass {
     }
 
     this.Console = console
+
+    // Every route defined from here on runs inside a per-request scope (see lib/requestScope).
+    wrapRouteDefine({ Route: this.App.Route })
 
     if (this.App.Route) {
       this.App.Route.Constants = {
