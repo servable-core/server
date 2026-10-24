@@ -1,5 +1,8 @@
 import { jest } from '@jest/globals'
-import RequestScope, { requestMemo, createBatchLoader, runInNewRequestScope, runInRequestScopeOf } from '../../src/lib/requestScope/index.js'
+import http from 'node:http'
+import { EventEmitter } from 'node:events'
+import RequestScope, { requestMemo, createBatchLoader, runInNewRequestScope, runInRequestScopeOf, RequestAbortedError } from '../../src/lib/requestScope/index.js'
+import { wrapRouteDefinition } from '../../src/lib/requestScope/wrapRouteDefinition.js'
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve))
 
@@ -149,5 +152,119 @@ describe('route definition wrapping', () => {
     expect([user, handled]).toEqual([1, 1])
     const otherHandled = await definedOptions.handler({ native: { request: {} } })
     expect(otherHandled).toBe(2)
+  })
+})
+
+describe('request abort signal', () => {
+  const buildFakeResponse = () => {
+    const response = new EventEmitter()
+    response.writableEnded = false
+    return response
+  }
+  const runWith = async ({ response, work }) => {
+    const nativeRequest = { res: response }
+    return runInRequestScopeOf({ nativeRequest, work })
+  }
+
+  it('is undefined / false outside a request', () => {
+    expect(RequestScope.requestSignal()).toBeUndefined()
+    expect(RequestScope.isRequestAborted()).toBe(false)
+    expect(() => RequestScope.throwIfRequestAborted()).not.toThrow()
+  })
+
+  it('does not abort when the response finished before close', async () => {
+    const response = buildFakeResponse()
+    let signal
+    await runWith({ response, work: async () => { signal = RequestScope.requestSignal() } })
+    response.writableEnded = true
+    response.emit('close')
+    expect(signal.aborted).toBe(false)
+  })
+
+  it('aborts when the connection closes before the response ended', async () => {
+    const response = buildFakeResponse()
+    await runWith({
+      response,
+      work: async () => {
+        expect(RequestScope.isRequestAborted()).toBe(false)
+        response.emit('close')
+        expect(RequestScope.isRequestAborted()).toBe(true)
+        expect(RequestScope.requestSignal().aborted).toBe(true)
+        expect(() => RequestScope.throwIfRequestAborted()).toThrow(RequestAbortedError)
+      },
+    })
+  })
+
+  it('re-entering the same request sees the same signal, another request does not', async () => {
+    const response = buildFakeResponse()
+    const nativeRequest = { res: response }
+    const signals = []
+    await runInRequestScopeOf({ nativeRequest, work: async () => signals.push(RequestScope.requestSignal()) })
+    await runInRequestScopeOf({ nativeRequest, work: async () => signals.push(RequestScope.requestSignal()) })
+    await runInRequestScopeOf({ nativeRequest: { res: buildFakeResponse() }, work: async () => signals.push(RequestScope.requestSignal()) })
+    expect(signals[0]).toBe(signals[1])
+    expect(signals[2]).not.toBe(signals[0])
+  })
+
+  it('RequestAbortedError has a stable name and flag', () => {
+    const error = new RequestAbortedError()
+    expect(error).toBeInstanceOf(Error)
+    expect(error.name).toBe('RequestAbortedError')
+    expect(error.isRequestAborted).toBe(true)
+  })
+
+  it('a real http server: finished response does not abort, closed client does', async () => {
+    let finishedSignal
+    let abortedSignal
+    const server = http.createServer((request, response) => {
+      // Express sets request.res; a bare http server does not.
+      request.res = response
+      runInRequestScopeOf({
+        nativeRequest: request,
+        work: async () => {
+          if (request.url === '/finish') {
+            finishedSignal = RequestScope.requestSignal()
+            response.end('ok')
+          } else {
+            abortedSignal = RequestScope.requestSignal()
+            // never answers
+          }
+        },
+      })
+    })
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const { port } = server.address()
+    await new Promise((resolve) => http.get({ port, host: '127.0.0.1', path: '/finish' }, (res) => { res.resume(); res.on('end', resolve) }))
+    await nextTick()
+    expect(finishedSignal.aborted).toBe(false)
+    const clientRequest = http.get({ port, host: '127.0.0.1', path: '/hang' })
+    clientRequest.on('error', () => {})
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    clientRequest.destroy()
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(abortedSignal.aborted).toBe(true)
+    await new Promise((resolve) => server.close(resolve))
+  })
+})
+
+describe('wrapRouteDefinition quiet drop', () => {
+  it('swallows RequestAbortedError from the handler, rethrows other errors', async () => {
+    const abortedRoute = wrapRouteDefinition({ handler: async () => { throw new RequestAbortedError() } })
+    await expect(abortedRoute.handler({ native: {} })).resolves.toBeUndefined()
+    const syncAbortedRoute = wrapRouteDefinition({ handler: () => { throw new RequestAbortedError() } })
+    await expect(syncAbortedRoute.handler({ native: {} })).resolves.toBeUndefined()
+    const brokenRoute = wrapRouteDefinition({ handler: async () => { throw new Error('boom') } })
+    await expect(brokenRoute.handler({ native: {} })).rejects.toThrow('boom')
+    const goodRoute = wrapRouteDefinition({ handler: async () => 'fine' })
+    await expect(goodRoute.handler({ native: {} })).resolves.toBe('fine')
+  })
+
+  it('exposes the signal inside the handler and aborts it when the response closes', async () => {
+    const response = new EventEmitter()
+    response.writableEnded = false
+    const route = wrapRouteDefinition({
+      handler: async () => { response.emit('close'); return RequestScope.isRequestAborted() },
+    })
+    await expect(route.handler({ native: { request: { res: response }, response } })).resolves.toBe(true)
   })
 })

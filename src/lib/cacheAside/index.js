@@ -30,7 +30,11 @@ export const registerCacheClient = (getClient, { timeoutMs = DEFAULT_COMMAND_TIM
   commandTimeoutMs = timeoutMs
 }
 
-export const cacheAside = async ({ key, ttlSeconds, load }) => {
+// `onOutcome` (optional) is told what happened, for statistics: `{ outcome, durationInMilliseconds }` where
+// outcome is 'hit', 'miss' (the load ran and its answer was written or tried to be) or 'error' (the cache
+// could not be read: the load ran as if there were no cache; the duration is the load's). It never changes the
+// answer: a callback that throws is ignored.
+export const cacheAside = async ({ key, ttlSeconds, load, onOutcome }) => {
   if (typeof key !== 'string' || key.length === 0) {
     throw new Error('cacheAside needs a non-empty string key')
   }
@@ -41,12 +45,27 @@ export const cacheAside = async ({ key, ttlSeconds, load }) => {
     throw new Error('cacheAside needs a load function')
   }
 
-  const cachedEntry = await readCachedEntry(key)
+  const reportOutcome = (outcome, durationInMilliseconds) => {
+    if (typeof onOutcome !== 'function') {
+      return
+    }
+    try {
+      onOutcome({ outcome, durationInMilliseconds })
+    } catch (error) {
+      // Statistics never change an answer.
+    }
+  }
+
+  const startedAt = Date.now()
+  const { entry: cachedEntry, isFailed } = await readCachedEntryOrFailure(key)
   if (cachedEntry) {
+    reportOutcome('hit', Date.now() - startedAt)
     return cachedEntry.value
   }
 
+  const loadStartedAt = Date.now()
   const loadedValue = await load()
+  reportOutcome(isFailed ? 'error' : 'miss', Date.now() - loadStartedAt)
   await writeCachedEntry({ key, ttlSeconds, value: loadedValue })
   return loadedValue
 }
@@ -88,24 +107,25 @@ const runBounded = async (command) => {
   }
 }
 
-const readCachedEntry = async (key) => {
+const readCachedEntryOrFailure = async (key) => {
   try {
     const redisClient = await getRedisClientOrNull()
     if (!redisClient) {
-      return null
+      // No client registered: nothing failed, there is simply no cache.
+      return { entry: null, isFailed: false }
     }
     const storedText = await runBounded(() => redisClient.get(key))
     if (typeof storedText !== 'string') {
-      return null
+      return { entry: null, isFailed: false }
     }
     const parsedEntry = JSON.parse(storedText)
     if (!parsedEntry || typeof parsedEntry !== 'object' || !('value' in parsedEntry)) {
-      return null
+      return { entry: null, isFailed: true }
     }
-    return parsedEntry
+    return { entry: parsedEntry, isFailed: false }
   } catch (error) {
     console.error('[servable/cacheAside] read failed, loading from the source', key, error?.message || error)
-    return null
+    return { entry: null, isFailed: true }
   }
 }
 

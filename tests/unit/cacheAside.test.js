@@ -108,4 +108,31 @@ describe('cacheAside', () => {
   it('exposes the same functions as the default export', () => {
     expect(CacheAside.cacheAside).toBe(cacheAside)
   })
+
+  describe('onOutcome', () => {
+    it('reports a hit, a miss and a failed read, with a duration, and ignores a callback that throws', async () => {
+      const outcomes = []
+      const onOutcome = ({ outcome, durationInMilliseconds }) => outcomes.push({ outcome, isNumber: typeof durationInMilliseconds === 'number' })
+
+      client.get.mockResolvedValueOnce(JSON.stringify({ value: 1 }))
+      await cacheAside({ key: 'k', ttlSeconds: 60, load: jest.fn(), onOutcome })
+      await cacheAside({ key: 'k', ttlSeconds: 60, load: async () => 2, onOutcome })
+      client.get.mockRejectedValueOnce(new Error('redis down'))
+      expect(await cacheAside({ key: 'k', ttlSeconds: 60, load: async () => 3, onOutcome })).toBe(3)
+
+      expect(outcomes).toEqual([
+        { outcome: 'hit', isNumber: true },
+        { outcome: 'miss', isNumber: true },
+        { outcome: 'error', isNumber: true },
+      ])
+      expect(await cacheAside({ key: 'k', ttlSeconds: 60, load: async () => 4, onOutcome: () => { throw new Error('boom') } })).toBe(4)
+    })
+
+    it('with no client registered the load is a miss, not an error', async () => {
+      registerCacheClient(null)
+      const outcomes = []
+      await cacheAside({ key: 'k', ttlSeconds: 60, load: async () => 1, onOutcome: ({ outcome }) => outcomes.push(outcome) })
+      expect(outcomes).toEqual(['miss'])
+    })
+  })
 })

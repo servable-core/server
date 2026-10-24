@@ -31,6 +31,10 @@ export default class Servable extends BaseClass {
   get RequestScope() { return RequestScope }
   requestMemo(options) { return RequestScope.requestMemo(options) }
   createBatchLoader(options) { return RequestScope.createBatchLoader(options) }
+  // Client-gone signal of the current request (undefined outside a request), see lib/requestScope.
+  requestSignal() { return RequestScope.requestSignal() }
+  isRequestAborted() { return RequestScope.isRequestAborted() }
+  throwIfRequestAborted() { return RequestScope.throwIfRequestAborted() }
 
   // Cross-request fact cache in Redis, fixed TTL, fail-open, see lib/cacheAside. The app registers
   // its Redis client once at boot; without one, every call simply loads from the source.

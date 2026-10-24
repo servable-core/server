@@ -10,10 +10,35 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 const scopeStorage = new AsyncLocalStorage()
 const SCOPE_PROPERTY_NAME = '__servableRequestScope'
 
+// Thrown by throwIfRequestAborted when the client has gone away. Servable's route wrapper treats
+// it as a quiet drop: nothing is logged, nothing is reported, and nothing is sent (nobody listens).
+export class RequestAbortedError extends Error {
+  constructor(message = 'The client closed the connection before the response was sent') {
+    super(message)
+    this.name = 'RequestAbortedError'
+    this.isRequestAborted = true
+  }
+}
+
 export const createRequestScope = () => ({
   memoPromisesByKey: new Map(),
   batchLoadersByName: new Map(),
+  abortController: new AbortController(),
 })
+
+// Aborts the scope's controller when the connection closes before the response was written out.
+// A response that finished normally also emits 'close', which must not abort. The listener lives
+// on the response object, so it is released with it and the scope keeps no extra reference.
+const watchForClientGone = ({ scope, nativeResponse }) => {
+  if (!nativeResponse || typeof nativeResponse.once !== 'function') {
+    return
+  }
+  nativeResponse.once('close', () => {
+    if (!nativeResponse.writableEnded && !scope.abortController.signal.aborted) {
+      scope.abortController.abort(new RequestAbortedError())
+    }
+  })
+}
 
 export const currentRequestScope = () => scopeStorage.getStore()
 
@@ -24,13 +49,14 @@ export const runInNewRequestScope = (work) => scopeStorage.run(createRequestScop
 
 // Runs `work` inside the scope attached to a native (Express) request, creating and attaching
 // one the first time. Calling it again with the same request re-enters the same scope.
-export const runInRequestScopeOf = ({ nativeRequest, work }) => {
+export const runInRequestScopeOf = ({ nativeRequest, nativeResponse, work }) => {
   if (!nativeRequest || typeof nativeRequest !== 'object') {
     return runInNewRequestScope(work)
   }
   let scope = nativeRequest[SCOPE_PROPERTY_NAME]
   if (!scope) {
     scope = createRequestScope()
+    watchForClientGone({ scope, nativeResponse: nativeResponse || nativeRequest.res })
     Object.defineProperty(nativeRequest, SCOPE_PROPERTY_NAME, {
       value: scope,
       enumerable: false,
@@ -39,6 +65,22 @@ export const runInRequestScopeOf = ({ nativeRequest, work }) => {
   }
   return scopeStorage.run(scope, work)
 }
+
+// The AbortSignal of the current request, aborted when the client leaves before the response is
+// done. `undefined` outside a request (jobs, scripts): there is never a process-wide signal.
+export const requestSignal = () => scopeStorage.getStore()?.abortController?.signal
+
+export const isRequestAborted = () => requestSignal()?.aborted === true
+
+// For long loops that serialize for a client: call between items so work stops once nobody waits.
+export const throwIfRequestAborted = () => {
+  if (isRequestAborted()) {
+    throw new RequestAbortedError()
+  }
+}
+
+export const isRequestAbortedError = (error) =>
+  Boolean(error) && (error instanceof RequestAbortedError || error.isRequestAborted === true)
 
 // Memoizes the promise of `load` under `key` for the life of the current request, so concurrent
 // callers share one load. A failed load is removed so a later caller tries again. Outside a
@@ -179,4 +221,9 @@ export default {
   hasRequestScope,
   requestMemo,
   createBatchLoader,
+  requestSignal,
+  isRequestAborted,
+  throwIfRequestAborted,
+  isRequestAbortedError,
+  RequestAbortedError,
 }

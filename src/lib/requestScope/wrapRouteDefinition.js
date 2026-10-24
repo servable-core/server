@@ -1,4 +1,4 @@
-import { runInRequestScopeOf } from './index.js'
+import { runInRequestScopeOf, isRequestAbortedError } from './index.js'
 
 // Wraps one route definition so everything the route runs (resolving the user, then the handler)
 // executes inside the request scope of the native request it is serving. The scope is created the
@@ -15,15 +15,28 @@ export const wrapRouteDefinition = (options) => {
     wrapped.handler = (...handlerArguments) =>
       runInRequestScopeOf({
         nativeRequest: handlerArguments[0]?.native?.request,
-        work: () => handler(...handlerArguments),
+        nativeResponse: handlerArguments[0]?.native?.response,
+        // The client is gone, so there is nobody to answer: drop quietly (no 500, no report).
+        work: async () => {
+          try {
+            return await handler(...handlerArguments)
+          } catch (error) {
+            if (isRequestAbortedError(error)) {
+              return undefined
+            }
+            throw error
+          }
+        },
       })
   }
 
   if (typeof servableArguments === 'function') {
     wrapped.servableArguments = (argumentsOfRequest) => {
       const nativeRequest = argumentsOfRequest?.native?.request
+      const nativeResponse = argumentsOfRequest?.native?.response
       return runInRequestScopeOf({
         nativeRequest,
+        nativeResponse,
         work: async () => {
           const resolved = await servableArguments(argumentsOfRequest)
           if (resolved && typeof resolved.userResolver === 'function') {
@@ -33,6 +46,7 @@ export const wrapRouteDefinition = (options) => {
               userResolver: (...resolverArguments) =>
                 runInRequestScopeOf({
                   nativeRequest,
+                  nativeResponse,
                   work: () => userResolver(...resolverArguments),
                 }),
             }
