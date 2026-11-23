@@ -4,6 +4,7 @@ import _LiveQueries from './livequeries/index.js'
 import _Operations from './operations/index.js'
 import TransactionContract from './transaction/index.js'
 import IndexesContract from './indexes/index.js'
+import SessionInvalidationsContract from './sessionInvalidations/index.js'
 import mintSessionTokens from './user/mintSessionTokens.js'
 import refreshSessionTokens from './user/refreshSessionTokens.js'
 import checkStepUpFreshness from './user/checkStepUpFreshness.js'
@@ -96,6 +97,12 @@ export default class Servable extends BaseClass {
     // Same for Servable.App.Indexes: an engine that makes no index answers so, it never leaves the name undefined.
     if (!this.App.Indexes) {
       this.App.Indexes = IndexesContract
+    }
+
+    // Same for Servable.App.SessionInvalidations: an engine that reports none says so, and the session-user cache
+    // (lib/sessionUserCache) then stays off.
+    if (!this.App.SessionInvalidations) {
+      this.App.SessionInvalidations = SessionInvalidationsContract
     }
 
     // Additional functions this package provides on Servable.App.User on top of whatever the

@@ -1,5 +1,11 @@
 import resolveAuthConfig from '../../../../../lib/auth/authConfig.js'
 import { verifyAccessToken } from '../../../../../lib/auth/tokenRotation.js'
+import {
+  hashedSessionTokenOf,
+  sessionUserCacheOfThisProcess,
+  userFromSnapshot,
+  userSnapshotOf,
+} from '../../../../../lib/sessionUserCache/index.js'
 
 export default async ({
   request,
@@ -39,12 +45,7 @@ export default async ({
   }
 
   try {
-    const query = new Servable.App.Query('_Session')
-      .equalTo("sessionToken", sessiontoken)
-      .greaterThan("expiresAt", (new Date()))
-      .include("user")
-
-    const session = await query.first({ useMasterKey: true })
+    const session = await resolvedSessionOf({ sessionToken: sessiontoken })
     if (!session) {
       return null
     }
@@ -54,32 +55,71 @@ export default async ({
     // never touches the refresh endpoint, so the binding there never sees them. Fails open when
     // either side is missing, exactly like the refresh path, so partner API callers sending the
     // token as a bare header (see getSessionToken below) and older sessions predating
-    // installationId keep working.
+    // installationId keep working. Checked on every request, cached session or not: the cache
+    // remembers the session, never this request's device.
     if (authConfig.legacySessionDeviceBindingEnabled) {
-      const boundInstallationId = session.get('installationId')
+      const boundInstallationId = session.installationId
       const installationId = request.headers?.['x-servable-installation-id']
       if (boundInstallationId && installationId && boundInstallationId !== installationId) {
         console.warn('[Servable Auth] session rejected: device mismatch', JSON.stringify({
-          sessionId: session.id,
+          sessionId: session.sessionId,
           boundInstallationId,
           requestInstallationId: installationId,
-          createdWith: session.get('createdWith') || null,
+          createdWith: session.createdWith,
         }))
         return null
       }
     }
 
-    const user = session.get('user')
-    if (!user) {
-      return null
-    }
-
-    user._authSessionId = session.id
+    const user = session.user
+    user._authSessionId = session.sessionId
     return user
   } catch (e) {
     console.error(e)
     return null
   }
+}
+
+// The session a token opens, with its own copy of the user: from this process's session-user cache when it holds
+// it (lib/sessionUserCache: 10 s, forgotten at once on a sign-out or a saved user), else from `_Session`, which is
+// then remembered. Null when the token opens nothing; that answer is never remembered.
+const resolvedSessionOf = async ({ sessionToken }) => {
+  const cache = await sessionUserCacheOfThisProcess()
+  const hash = cache ? hashedSessionTokenOf(sessionToken) : null
+  const cached = cache ? cache.read(hash) : null
+  if (cached) {
+    return { ...cached, user: userFromSnapshot(cached.userSnapshot) }
+  }
+
+  const invalidationCountAtStart = cache ? cache.invalidationCount() : 0
+  const query = new Servable.App.Query('_Session')
+    .equalTo("sessionToken", sessionToken)
+    .greaterThan("expiresAt", (new Date()))
+    .include("user")
+
+  const session = await query.first({ useMasterKey: true })
+  if (!session) {
+    return null
+  }
+  const user = session.get('user')
+  if (!user) {
+    return null
+  }
+
+  const resolved = {
+    sessionId: session.id,
+    userId: user.id,
+    expiresAtMilliseconds: session.get('expiresAt')?.getTime?.() ?? 0,
+    installationId: session.get('installationId') || null,
+    createdWith: session.get('createdWith') || null,
+  }
+  if (cache) {
+    const userSnapshot = userSnapshotOf(user)
+    if (userSnapshot) {
+      cache.remember(hash, { ...resolved, userSnapshot }, { invalidationCountAtStart })
+    }
+  }
+  return { ...resolved, user }
 }
 
 
