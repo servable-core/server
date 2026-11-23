@@ -3,6 +3,7 @@ import Services from './services/index.js'
 import _LiveQueries from './livequeries/index.js'
 import _Operations from './operations/index.js'
 import TransactionContract from './transaction/index.js'
+import IndexesContract from './indexes/index.js'
 import mintSessionTokens from './user/mintSessionTokens.js'
 import refreshSessionTokens from './user/refreshSessionTokens.js'
 import checkStepUpFreshness from './user/checkStepUpFreshness.js'
@@ -90,6 +91,11 @@ export default class Servable extends BaseClass {
 
     if (!this.App.Transaction) {
       this.App.Transaction = TransactionContract
+    }
+
+    // Same for Servable.App.Indexes: an engine that makes no index answers so, it never leaves the name undefined.
+    if (!this.App.Indexes) {
+      this.App.Indexes = IndexesContract
     }
 
     // Additional functions this package provides on Servable.App.User on top of whatever the
