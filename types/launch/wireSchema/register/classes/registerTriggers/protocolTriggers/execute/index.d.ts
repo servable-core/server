@@ -1,8 +1,12 @@
-declare function _default({ allProtocols, protocol, request, operationName, protocolInstance, }: {
-    allProtocols: any;
-    protocol: any;
+declare function _default({ protocol, request, operationName, protocolInstance, protocolOperations, }: {
     request: any;
-    operationName: any;
-    protocolInstance: any;
+    operationName: string;
+    protocolOperations: Array<{
+        protocolId: string;
+        protocolPayload: any;
+        operation: Function;
+    }>;
+    protocol: any;
+    protocolInstance?: any;
 }): Promise<void>;
 export default _default;

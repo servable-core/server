@@ -9,7 +9,8 @@ import registerLiveQueries from "./livequeries/index.js"
 export default async ({
   protocol,
   servableConfig,
-  allProtocols
+  allProtocols,
+  triggerPlans,
 }) => {
 
   const prefix = protocol._id === 'app' ? null : protocol._id
@@ -66,5 +67,6 @@ export default async ({
     protocol,
     allProtocols,
     managedClasses,
+    triggerPlans,
   })
 }

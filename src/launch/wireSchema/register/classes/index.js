@@ -8,6 +8,7 @@ export default async ({
   protocol,
   allProtocols,
   servableConfig,
+  triggerPlans,
 }) => {
 
   return Promise.all(managedClasses.map(async _class => {
@@ -15,7 +16,8 @@ export default async ({
       protocol,
       servableConfig,
       allProtocols,
-      _class
+      _class,
+      triggerPlans,
     })
 
     const { className } = _class

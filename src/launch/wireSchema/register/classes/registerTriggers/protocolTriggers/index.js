@@ -1,78 +1,53 @@
 import execute from './execute/index.js'
 
-export const beforeSave = async ({
-  request,
-  protocolInstance,
-  allProtocols,
-  protocol }) => {
+// The protocols' part of each trigger. `kindPlan` is the class's plan for that kind (../triggerPlan.js).
+
+export const beforeSave = async ({ request, protocolInstance, protocol, kindPlan }) => {
   const { object } = request
   let dirtyKeys = object.dirtyKeys()
   dirtyKeys = dirtyKeys ? dirtyKeys : []
+  // Read by the afterSave hooks: Parse copies the beforeSave context into the afterSave request.
   request.context.dirtyKeys = dirtyKeys
 
   await execute({
-    allProtocols,
     protocol,
     protocolInstance,
     request,
-    operationName: 'beforeSave'
+    operationName: 'beforeSave',
+    protocolOperations: kindPlan.protocolOperations,
   })
 }
 
-export const afterSave = async ({ request, allProtocols, protocol, protocolInstance }) => {
-  // await execute({
-  //   allProtocols,
-  //   protocol,
-  //   protocolInstance,
-  //   request,
-  //   operationName: 'afterSave'
-  // })
-  execute({
-    allProtocols,
-    protocol,
-    protocolInstance,
-    request,
-    operationName: 'afterSave'
-  })
-}
-
-export const beforeDelete = async ({ request, allProtocols, protocol, protocolInstance, }) => {
+// Not awaited by the trigger: the afterSave operations run in the background, as before. The first turn is given
+// back before any of them starts, so the class's own afterSave hooks still start first: before the plan, the protocols
+// only started after the loader's file checks.
+export const afterSave = async ({ request, protocol, protocolInstance, kindPlan }) => {
+  await Promise.resolve()
   await execute({
-    allProtocols,
     protocol,
     protocolInstance,
     request,
-    operationName: 'beforeDelete'
+    operationName: 'afterSave',
+    protocolOperations: kindPlan.protocolOperations,
   })
 }
 
-export const afterDelete = async ({ request, allProtocols, protocol, protocolInstance, }) => {
+export const beforeDelete = async ({ request, protocol, protocolInstance, kindPlan }) => {
   await execute({
-    allProtocols,
     protocol,
     protocolInstance,
     request,
-    operationName: 'afterDelete'
+    operationName: 'beforeDelete',
+    protocolOperations: kindPlan.protocolOperations,
   })
 }
 
-export const beforeFind = async ({ request, allProtocols, protocol, protocolInstance, }) => {
+export const afterDelete = async ({ request, protocol, protocolInstance, kindPlan }) => {
   await execute({
-    allProtocols,
     protocol,
     protocolInstance,
     request,
-    operationName: 'beforeFind'
-  })
-}
-
-
-export const afterFind = async ({ request, allProtocols, protocol, protocolInstance, }) => {
-  await execute({
-    allProtocols,
-    protocol,
-    protocolInstance,
-    request,
-    operationName: 'afterFind'
+    operationName: 'afterDelete',
+    protocolOperations: kindPlan.protocolOperations,
   })
 }
