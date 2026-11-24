@@ -5,6 +5,7 @@ import _Operations from './operations/index.js'
 import TransactionContract from './transaction/index.js'
 import IndexesContract from './indexes/index.js'
 import SessionInvalidationsContract from './sessionInvalidations/index.js'
+import MetricsContract from './metrics/index.js'
 import mintSessionTokens from './user/mintSessionTokens.js'
 import refreshSessionTokens from './user/refreshSessionTokens.js'
 import checkStepUpFreshness from './user/checkStepUpFreshness.js'
@@ -103,6 +104,12 @@ export default class Servable extends BaseClass {
     // (lib/sessionUserCache) then stays off.
     if (!this.App.SessionInvalidations) {
       this.App.SessionInvalidations = SessionInvalidationsContract
+    }
+
+    // Same for Servable.App.Metrics: the engine, this package and the protocols count through it without importing the
+    // app; an engine without its own records into the process's OpenTelemetry meter provider, a no-op when none is set.
+    if (!this.App.Metrics) {
+      this.App.Metrics = MetricsContract
     }
 
     // Additional functions this package provides on Servable.App.User on top of whatever the
