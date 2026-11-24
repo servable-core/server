@@ -69,6 +69,47 @@ describe('disposableorphansable: a Relation orphan', () => {
   })
 
   test('a field the object does not hold destroys nothing', async () => {
-    await expect(handleItem({ object: objectHolding('pshIns', undefined), field: 'seeder' })).resolves.toBeUndefined()
+    await expect(handleItem({ object: objectHolding('pshIns', undefined), field: 'seeder' })).resolves.toEqual({ destroyed: 0, failed: 0 })
+  })
+})
+
+// Production proof of the orphans' fix (owner's Q1580 a): every row destroyed after its parent is counted by the parent's class and
+// the orphan field, and every row that failed to go too, through Servable.App.Metrics. Never an id.
+describe('disposableorphansable: the counts', () => {
+  const recordingMetrics = () => {
+    const recorded = []
+    return { recorded, counter: (name) => ({ add: (value, attributes) => recorded.push({ name, value, attributes }) }) }
+  }
+  const parentHolding = (field, value) => ({ className: 'Publication', get: (key) => (key === field ? value : undefined) })
+  let consoleError
+  beforeEach(() => { consoleError = console.error; console.error = () => {} })
+  afterEach(() => { console.error = consoleError; delete globalThis.Servable })
+
+  test('rows destroyed are counted by parent class and field (the healthy path): no failure counted', async () => {
+    const metrics = recordingMetrics()
+    globalThis.Servable = { App: { Metrics: metrics } }
+    const handled = await handleItem({ object: parentHolding('pshIns', new ParseRelation([rowOf('i1'), rowOf('i2')])), field: 'pshIns' })
+    expect(handled).toEqual({ destroyed: 2, failed: 0 })
+    expect(metrics.recorded).toEqual([{ name: 'servable_orphans_destroyed_total', value: 2, attributes: { class_name: 'Publication', field: 'pshIns' } }])
+  })
+
+  test('a row that fails to go is counted as a failure (the alarm path), the others as destroyed', async () => {
+    const metrics = recordingMetrics()
+    globalThis.Servable = { App: { Metrics: metrics } }
+    const handled = await handleItem({ object: parentHolding('members', [rowOf('m1', { isFailing: true }), rowOf('m2')]), field: 'members' })
+    expect(handled).toEqual({ destroyed: 1, failed: 1 })
+    expect(metrics.recorded).toEqual([
+      { name: 'servable_orphans_destroyed_total', value: 1, attributes: { class_name: 'Publication', field: 'members' } },
+      { name: 'servable_orphans_destroy_failed_total', value: 1, attributes: { class_name: 'Publication', field: 'members' } },
+    ])
+  })
+
+  test('nothing to destroy counts nothing, and a contract that throws never fails the delete', async () => {
+    const metrics = recordingMetrics()
+    globalThis.Servable = { App: { Metrics: metrics } }
+    await handleItem({ object: parentHolding('pshIns', undefined), field: 'pshIns' })
+    expect(metrics.recorded).toEqual([])
+    globalThis.Servable = { App: { Metrics: { counter: () => { throw new Error('broken') } } } }
+    await expect(handleItem({ object: parentHolding('members', [rowOf('m3')]), field: 'members' })).resolves.toEqual({ destroyed: 1, failed: 0 })
   })
 })
