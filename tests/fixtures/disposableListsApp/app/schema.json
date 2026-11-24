@@ -1,0 +1,22 @@
+{
+  "managed": {
+    "classes": [
+      {
+        "className": "Application",
+        "fields": {
+          "name": {
+            "type": "String"
+          }
+        }
+      },
+      {
+        "className": "Template",
+        "fields": {
+          "name": {
+            "type": "String"
+          }
+        }
+      }
+    ]
+  }
+}

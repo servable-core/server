@@ -17,7 +17,7 @@ export default class ServableConfigEntry extends Servable.App.Object {
   /* #endregion */
 
   /* #region disposableorphansable */
-  disposableOrphans = () => {
+  disposableOrphans() {
     const items = super.disposableOrphans ? super.disposableOrphans() : []
     return [
       ...items,
