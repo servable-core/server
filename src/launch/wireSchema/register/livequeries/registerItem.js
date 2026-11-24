@@ -1,10 +1,14 @@
-import validate from './validate.js'
+import { reasonLiveQueryIsNotRegistered } from './validate.js'
 
 export default async ({
   liveQuery,
   protocol }) => {
 
-  if (!validate({ liveQuery })) {
+  const reasonNotRegistered = reasonLiveQueryIsNotRegistered({ liveQuery })
+  if (reasonNotRegistered) {
+    if (liveQuery && typeof liveQuery === 'object' && liveQuery.id) {
+      console.info(`[SERVABLE] [live queries] ${liveQuery.id} is not registered: ${reasonNotRegistered}`)
+    }
     return
   }
 
