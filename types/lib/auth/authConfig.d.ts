@@ -6,6 +6,7 @@ declare function _default(): {
     deviceBindingEnabled: boolean;
     legacySessionDeviceBindingEnabled: boolean;
     refreshTokenRotationLeewaySeconds: number;
+    refreshTokenRotationUntilUsed: boolean;
     stepUpFreshnessSeconds: number;
 };
 export default _default;
