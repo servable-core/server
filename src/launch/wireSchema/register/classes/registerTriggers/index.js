@@ -1,5 +1,6 @@
 import * as ProtocolTriggers from './protocolTriggers/index.js'
 import buildClassTriggerPlan, { areTriggersRegisteredOnlyWhereHandledFor } from './triggerPlan.js'
+import { recordTheTriggerRun, recordWhetherTheDirtyKeysAreMissing } from '../../../../../lib/proof/triggerSignals.js'
 
 /**
  * Registers a managed class's save and delete triggers with the engine, from its trigger plan (./triggerPlan.js):
@@ -36,6 +37,7 @@ export default async ({
 
     if (registeredKinds.includes('beforeSave')) {
       Servable.App.Cloud.beforeSave(className, async (request) => {
+        recordTheTriggerRun({ className, kind: 'beforeSave' })
         try {
           await ProtocolTriggers.beforeSave({ request, protocol, protocolInstance, kindPlan: kinds.beforeSave })
           for (const hookName of kinds.beforeSave.classHookNames) {
@@ -49,6 +51,9 @@ export default async ({
 
     if (registeredKinds.includes('afterSave')) {
       Servable.App.Cloud.afterSave(className, async (request) => {
+        // Production proof 3.6: counted, and the alarm when the context lost the dirtyKeys its beforeSave puts there.
+        recordTheTriggerRun({ className, kind: 'afterSave' })
+        recordWhetherTheDirtyKeysAreMissing({ className, request })
         try {
           // Nothing awaited: the protocols' and the class's afterSave work runs in the background, as before.
           ProtocolTriggers.afterSave({ request, protocol, protocolInstance, kindPlan: kinds.afterSave })
@@ -63,6 +68,7 @@ export default async ({
 
     if (registeredKinds.includes('beforeDelete')) {
       Servable.App.Cloud.beforeDelete(className, async (request) => {
+        recordTheTriggerRun({ className, kind: 'beforeDelete' })
         try {
           await ProtocolTriggers.beforeDelete({ request, protocol, protocolInstance, kindPlan: kinds.beforeDelete })
           for (const hookName of kinds.beforeDelete.classHookNames) {
@@ -76,6 +82,7 @@ export default async ({
 
     if (registeredKinds.includes('afterDelete')) {
       Servable.App.Cloud.afterDelete(className, async (request) => {
+        recordTheTriggerRun({ className, kind: 'afterDelete' })
         try {
           await ProtocolTriggers.afterDelete({ request, protocol, protocolInstance, kindPlan: kinds.afterDelete })
           for (const hookName of kinds.afterDelete.classHookNames) {

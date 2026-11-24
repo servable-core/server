@@ -6,6 +6,7 @@ import {
   userFromSnapshot,
   userSnapshotOf,
 } from '../../../../../lib/sessionUserCache/index.js'
+import { recordTheSessionResolution } from '../../../../../lib/sessionUserCache/sessionSignals.js'
 
 export default async ({
   request,
@@ -30,6 +31,7 @@ export default async ({
             // with (via processHttp's checkStepUpFreshness call) without a second full lookup -
             // the JWT payload already carries the session id (sid), no query needed here.
             user._authSessionId = decoded.sid
+            recordTheSessionResolution({ path: 'jwt', result: 'user' })
             return user
           }
         } catch (e) {
@@ -41,12 +43,14 @@ export default async ({
 
   const sessiontoken = getSessionToken(request)
   if (!sessiontoken) {
+    recordTheSessionResolution({ path: 'no_token', result: 'none' })
     return null
   }
 
   try {
     const session = await resolvedSessionOf({ sessionToken: sessiontoken })
-    if (!session) {
+    if (!session.user) {
+      recordTheSessionResolution({ path: session.source, result: 'none' })
       return null
     }
 
@@ -67,12 +71,14 @@ export default async ({
           requestInstallationId: installationId,
           createdWith: session.createdWith,
         }))
+        recordTheSessionResolution({ path: session.source, result: 'device_mismatch' })
         return null
       }
     }
 
     const user = session.user
     user._authSessionId = session.sessionId
+    recordTheSessionResolution({ path: session.source, result: 'user' })
     return user
   } catch (e) {
     console.error(e)
@@ -82,13 +88,18 @@ export default async ({
 
 // The session a token opens, with its own copy of the user: from this process's session-user cache when it holds
 // it (lib/sessionUserCache: 10 s, forgotten at once on a sign-out or a saved user), else from `_Session`, which is
-// then remembered. Null when the token opens nothing; that answer is never remembered.
+// then remembered. `user` null when the token opens nothing; that answer is never remembered. `source` says where it came
+// from (`cache` or `session_query`), for the counts of production proof 3.5.
+/**
+ * @param {{ sessionToken: string }} props
+ * @returns {Promise<{ user: any, source: 'cache' | 'session_query', sessionId?: string, userId?: string, expiresAtMilliseconds?: number, installationId?: string | null, createdWith?: any }>}
+ */
 const resolvedSessionOf = async ({ sessionToken }) => {
   const cache = await sessionUserCacheOfThisProcess()
   const hash = cache ? hashedSessionTokenOf(sessionToken) : null
   const cached = cache ? cache.read(hash) : null
   if (cached) {
-    return { ...cached, user: userFromSnapshot(cached.userSnapshot) }
+    return { ...cached, user: userFromSnapshot(cached.userSnapshot), source: 'cache' }
   }
 
   const invalidationCountAtStart = cache ? cache.invalidationCount() : 0
@@ -99,11 +110,11 @@ const resolvedSessionOf = async ({ sessionToken }) => {
 
   const session = await query.first({ useMasterKey: true })
   if (!session) {
-    return null
+    return { user: null, source: 'session_query' }
   }
   const user = session.get('user')
   if (!user) {
-    return null
+    return { user: null, source: 'session_query' }
   }
 
   const resolved = {
@@ -119,7 +130,7 @@ const resolvedSessionOf = async ({ sessionToken }) => {
       cache.remember(hash, { ...resolved, userSnapshot }, { invalidationCountAtStart })
     }
   }
-  return { ...resolved, user }
+  return { ...resolved, user, source: 'session_query' }
 }
 
 

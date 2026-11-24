@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { sessionUserCacheSignals } from './sessionSignals.js'
 
 // Who a session token is, remembered for a few seconds in this process (framework performance audit 2026-11-23, F3;
 // owner's Q1092 a). Every signed-in request resolved its token with a `_Session` query including the user (two
@@ -100,8 +101,9 @@ export const sessionUserCacheSettingsFrom = ({ serverConfiguration = {}, env = p
  * @param {number} props.ttlMilliseconds
  * @param {number} props.maxEntries
  * @param {() => number} [props.now]
+ * @param {typeof sessionUserCacheSignals} [props.signals] - what it counts (production proof 3.5, ./sessionSignals.js).
  */
-export const createSessionUserCache = ({ ttlMilliseconds, maxEntries, now = Date.now }) => {
+export const createSessionUserCache = ({ ttlMilliseconds, maxEntries, now = Date.now, signals = sessionUserCacheSignals }) => {
   /** @type {Map<string, { session: ResolvedSession, storedAt: number }>} */
   const entries = new Map()
   /** @type {Map<string, Set<string>>} */
@@ -161,9 +163,11 @@ export const createSessionUserCache = ({ ttlMilliseconds, maxEntries, now = Date
      */
     remember: (hash, session, { invalidationCountAtStart }) => {
       if (invalidationCountAtStart !== invalidationCount) {
+        signals.remembered('refused_invalidated')
         return false
       }
       if (!session?.sessionId || !session?.userId || !(session.expiresAtMilliseconds > now()) || session.userSnapshot == null) {
+        signals.remembered('refused_invalid')
         return false
       }
       drop(hash)
@@ -176,6 +180,8 @@ export const createSessionUserCache = ({ ttlMilliseconds, maxEntries, now = Date
       while (entries.size > maxEntries) {
         drop(entries.keys().next().value)
       }
+      signals.remembered('stored')
+      signals.sized(entries.size)
       return true
     },
 
@@ -186,23 +192,29 @@ export const createSessionUserCache = ({ ttlMilliseconds, maxEntries, now = Date
     forget: (invalidation = {}) => {
       invalidationCount += 1
       if (invalidation.isEverything) {
+        signals.invalidated('everything')
         entries.clear()
         hashesByUserId.clear()
         hashBySessionId.clear()
+        signals.sized(entries.size)
         return
       }
       if (typeof invalidation.sessionToken === 'string') {
+        signals.invalidated('token')
         drop(hashedSessionTokenOf(invalidation.sessionToken))
       }
       if (typeof invalidation.sessionId === 'string') {
+        signals.invalidated('session')
         const hash = hashBySessionId.get(invalidation.sessionId)
         hash && drop(hash)
       }
       if (typeof invalidation.userId === 'string') {
+        signals.invalidated('user')
         for (const hash of [...(hashesByUserId.get(invalidation.userId) || [])]) {
           drop(hash)
         }
       }
+      signals.sized(entries.size)
     },
 
     size: () => entries.size,

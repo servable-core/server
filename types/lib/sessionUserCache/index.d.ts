@@ -12,10 +12,11 @@ export function sessionUserCacheSettingsFrom({ serverConfiguration, env }?: {
     sessionUserCacheTtlMilliseconds: number;
     sessionUserCacheMaxEntries: number;
 };
-export function createSessionUserCache({ ttlMilliseconds, maxEntries, now }: {
+export function createSessionUserCache({ ttlMilliseconds, maxEntries, now, signals }: {
     ttlMilliseconds: number;
     maxEntries: number;
     now?: () => number;
+    signals?: typeof sessionUserCacheSignals;
 }): {
     /** What a lookup records before it starts, to hand back to `remember`. */
     invalidationCount: () => number;
@@ -78,3 +79,4 @@ export type ResolvedSession = {
      */
     userSnapshot: any;
 };
+import { sessionUserCacheSignals } from './sessionSignals.js';

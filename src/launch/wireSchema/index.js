@@ -1,4 +1,6 @@
 import registerProtocol from "./register/index.js"
+import { areTriggersRegisteredOnlyWhereHandledFor } from "./register/classes/registerTriggers/triggerPlan.js"
+import { reportTheTriggerPlan } from "../../lib/proof/triggerSignals.js"
 
 /**
  * One line on what the trigger plans registered (register/classes/registerTriggers/triggerPlan.js).
@@ -26,5 +28,7 @@ export default async ({ schema, servableConfig }) => {
     })
   }))
   console.log("[Servable]", triggerPlansSummaryOf(triggerPlans))
+  // Production proof 3.6: the plan's identity, its fields in a leading object.
+  reportTheTriggerPlan({ triggerPlans, isOnlyWhereHandled: areTriggersRegisteredOnlyWhereHandledFor({ servableConfig }) })
   console.log("[Servable]", `Launch > Wire schema > Success`)
 }
