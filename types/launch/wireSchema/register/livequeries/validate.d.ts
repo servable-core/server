@@ -1,4 +1,7 @@
+export function reasonLiveQueryIsNotRegistered({ liveQuery }: {
+    liveQuery: any;
+}): string | null;
 declare function _default({ liveQuery }: {
     liveQuery: any;
-}): Promise<boolean>;
+}): boolean;
 export default _default;

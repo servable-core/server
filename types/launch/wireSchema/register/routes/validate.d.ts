@@ -1,4 +1,7 @@
+export function reasonRouteIsNotDefined({ route }: {
+    route: any;
+}): string | null;
 declare function _default({ route }: {
     route: any;
-}): Promise<boolean>;
+}): boolean;
 export default _default;

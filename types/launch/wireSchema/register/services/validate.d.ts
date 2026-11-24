@@ -1,4 +1,7 @@
+export function reasonServiceIsNotRegistered({ service }: {
+    service: any;
+}): string | null;
 declare function _default({ service }: {
     service: any;
-}): Promise<boolean>;
+}): boolean;
 export default _default;
