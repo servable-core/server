@@ -6,6 +6,7 @@ import TransactionContract from './transaction/index.js'
 import IndexesContract from './indexes/index.js'
 import SessionInvalidationsContract from './sessionInvalidations/index.js'
 import MetricsContract from './metrics/index.js'
+import { createJobsContract } from './jobs/index.js'
 import mintSessionTokens from './user/mintSessionTokens.js'
 import refreshSessionTokens from './user/refreshSessionTokens.js'
 import checkStepUpFreshness from './user/checkStepUpFreshness.js'
@@ -111,6 +112,14 @@ export default class Servable extends BaseClass {
     if (!this.App.Metrics) {
       this.App.Metrics = MetricsContract
     }
+
+    // Servable.App.Jobs keeps every job it registers by its id and can run one now (`runNow`), under one lock per job shared
+    // with the scheduled run (servableConfig.jobs.lock, the app's). The engine's own Jobs only schedules; it is given each
+    // job's handler wrapped in that lock (domain/servable/jobs, job-run door design, 2026-11-27).
+    this.App.Jobs = createJobsContract({
+      engineJobs: this.App.Jobs,
+      lockOfJobs: () => servableConfig?.jobs?.lock,
+    })
 
     // Additional functions this package provides on Servable.App.User on top of whatever the
     // engine's own User implementation exposes (Parse.User's logIn, logInWith, signUp, become,

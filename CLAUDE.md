@@ -113,3 +113,18 @@ Tests: `tests/unit/triggerPlan.test.js` (random protocol graphs against the froz
 ## Disabled routes, services and live queries are honoured (2026-11-23, owner's Q1376 a)
 
 `launch/wireSchema/register/{routes,services,livequeries}/validate.js` were `async`, so `!validate()` tested a promise and everything was registered, `disabled: true` included. They are synchronous and say why an export is left out (`reasonRouteIsNotDefined`, `reasonServiceIsNotRegistered`, `reasonLiveQueryIsNotRegistered`); `registerItem.js` logs each named item left out (`console.info`). A route needs a handler, a live query a query, a service a handler: **a service's `register` hook stays optional**, as `domain/servable/services` treats it (the old test also required it, which no backend/main service has: honouring it as written would have dropped all of them). Checked on backend/main on 2026-11-24 by importing every file the loaders read: 1,025 routes all kept, 388 services kept (17 more not importable without Typesense's env, all with an id and a handler), 2 bunnyable `services/upload/lib/` helpers left out (they export functions, were registered as services with no id). No option: it was a bug. Test: `tests/unit/wireSchemaRegistration.test.js`.
+
+## Jobs registry and run now (2026-11-27, owner's Q431 a / Q435 a)
+
+`src/domain/servable/jobs/index.js`, wired in `domain/servable/index.js`'s `hydrate` over the engine's own `App.Jobs`:
+`Servable.App.Jobs.define` records each descriptor by its `id` before handing the engine a handler wrapped in the job's
+lock; `findJob`, `listJobIds` and `runNow({ id, params, asOf, isDryRun })` answer from that registry. `runNow` never
+throws: a refusal is `{ hasRun: false, refusalCode }` (`jobNotFound`, `jobIsRunning`, `paramsNotSupported`,
+`dryRunNotSupported`, `asOfNotSupported`, `asOfNotADate`), a handler that throws is `{ hasRun: true, hasFailed: true }`.
+What a run now may pass is the descriptor's to declare (`runNowParams`, `isDryRunSupported`, `isAsOfSupported`). The
+lock is the app's, `servableConfig.jobs.lock({ key, ttlSeconds, operation }) → { isAcquired, result }`, keyed
+`servable:job:<id>`, shared by the scheduled run (which skips when busy) and a run now (which answers `jobIsRunning`);
+without it jobs run unlocked, as before. The engine is unchanged (still one Agenda instance per job, the known issue in
+the jobs reference). This package has no door: the app guards its own route. Design:
+`.docs/technical/job-run-door-design.md` (workspace root). Tests: `tests/unit/jobsContract.test.js` (incl. a 60-run
+property test of the lock).
